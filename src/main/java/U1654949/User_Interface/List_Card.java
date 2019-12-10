@@ -99,10 +99,8 @@ public class List_Card extends JPanel {
 
         addLotButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                // Refresh any prior result text
                 resultTextOut.setText("");
 
-                // Gather user inputs
                 String itemName = itemNameIn.getText();
                 String itemDescription = itemDescriptionIn.getText();
                 Number startingPrice = Common_Functions.getTextAsNumber(startingPriceIn);
@@ -159,7 +157,6 @@ public class List_Card extends JPanel {
         add(bidListingPanel, BorderLayout.SOUTH);
 
         try {
-            // Ensure that all listeners are set for notify
             space.notify(new U1654949_Lot_Updater(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
             space.notify(new U1654949_Lot_Counter(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
             space.notify(new U1654949_Lot_Remover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
@@ -179,14 +176,13 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                // Grab the latest version of the U1654949_LotCounter and the latest lot from the Space
                 U1654949_Lot_Counter Counter = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
+                System.out.println(Counter.getItemCounter());
                 U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(Counter.getItemCounter()), null, Default_Variables.SPACE_TIMEOUT);
+                System.out.println(latestLot);
 
-                // Convert the lot to an Object[][]
                 Object[] insertion = latestLot.asObjectArray();
 
-                // Ensure the lot id does not already exist
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
                     if (lots.get(i).getId() == latestLot.getId()) {
@@ -195,12 +191,10 @@ public class List_Card extends JPanel {
                     }
                 }
 
-                // If it does not exist, insert new entry
                 if(currentIndex == -1) {
                     lots.add(latestLot);
                     model.addRow(insertion);
                 } else {
-                    // Update old entry (should never occur)
                     lots.set(currentIndex, latestLot);
                     model.setValueAt(insertion[3], currentIndex, 3);
                 }
@@ -218,10 +212,8 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                // Read the latest U1654949_LotChange object from the Space (there should only be one)
                 U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) space.read(new U1654949_Lot_Updater(), null, Default_Variables.SPACE_TIMEOUT);
 
-                // Find the existing index of the lot with a matching id
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
                     if (lots.get(i).getId() == lotChange.getLotId()) {
@@ -230,21 +222,16 @@ public class List_Card extends JPanel {
                     }
                 }
 
-                // If there isn't one, other listeners will handle this
                 if(currentIndex == -1){
                     return;
                 }
 
-                // Take the lot from the index
                 U1654949_Lot_Space lot = lots.get(currentIndex);
 
-                // Apply the new price to the lot
                 lot.setPrice(lotChange.getLotPrice());
 
-                // Convert to an Object[][]
                 Object[] insertion = lot.asObjectArray();
 
-                // Replace the lot in the local list and table with the changed lot
                 lots.set(currentIndex, lot);
                 model.setValueAt(insertion[3], currentIndex, 3);
             } catch (Exception e) {
@@ -261,11 +248,9 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                // Grab the latest U1654949_LotRemover from the Space (there should only be one).
                 U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(), null, Default_Variables.SPACE_TIMEOUT);
 
-                // Find the lot with the matching lot id (if there is one)
-                int currentIndex = -1;
+                int currentIndex = 0;
                 for (int i = 0, j = lots.size(); i < j; i++){
                     if (lots.get(i).getId() == remover.getId()) {
                         currentIndex = i;
@@ -273,34 +258,28 @@ public class List_Card extends JPanel {
                     }
                 }
 
-                // If the lot has ended
                 if(remover.isEnded()){
-                    // Grab the lot at the current index
+                    System.out.println(lots.size());
                     U1654949_Lot_Space lot = lots.get(currentIndex);
 
-                    // Set the ended field to true
                     lot.setEnded(true);
 
-                    // Update the lot and table with the Ended status
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 4);
 
-                    // Display a dialog if the current user won the ended item
+
                     if(User.getCurrentUser().equals(lot.getUser())){
                         JOptionPane.showMessageDialog(null, "You just won " + lot.getName() + "!");
                     }
                 }
 
-                // If the U1654949_Lot exists and was removed, remove it from the table
                 if(remover.isRemoved() && currentIndex > -1){
                     lots.remove(currentIndex);
                     model.removeRow(currentIndex);
                 }
 
-                // Ensure that the matching lot is removed from the Space if it exists
                 space.takeIfExists(new U1654949_Lot_Space(remover.getId()), null, 1000);
 
-                // Remove all bids associated with the U1654949_Lot
                 Object o;
                 do {
                     o = space.takeIfExists(new U1654949_Bid_Space(remover.getId()), null, 1000);
