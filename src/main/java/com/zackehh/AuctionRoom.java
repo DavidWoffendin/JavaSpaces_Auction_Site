@@ -1,6 +1,6 @@
 package com.zackehh;
 
-import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Lot_Space;
 import com.zackehh.auction.U1654949_Bid_Counter;
 import com.zackehh.auction.U1654949_Lot_Counter;
 import com.zackehh.ui.cards.AuctionCard;
@@ -29,7 +29,7 @@ public class AuctionRoom extends JFrame {
     /**
      * A list of lot items which are being tracked in the space.
      */
-    private final ArrayList<U1654949_Lot_Class> lots = new ArrayList<U1654949_Lot_Class>();
+    private final ArrayList<U1654949_Lot_Space> lots = new ArrayList<U1654949_Lot_Space>();
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -141,10 +141,10 @@ public class AuctionRoom extends JFrame {
                     while(i <= secretary.getItemCounter()) {
 
                         // Search for the next template in the Space
-                        U1654949_Lot_Class template = new U1654949_Lot_Class(i++ + 1, null, null, null, null, null, false, false);
+                        U1654949_Lot_Space template = new U1654949_Lot_Space(i++ + 1, null, null, null, null, null, false, false);
 
                         // If the object exists in the space
-                        U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.readIfExists(template, null, 1000);
+                        U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.readIfExists(template, null, 1000);
 
                         // Add any existing lots to the tables
                         if (latestLot != null) {

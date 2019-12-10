@@ -1,7 +1,7 @@
 package com.zackehh.ui.cards;
 
-import com.zackehh.auction.U1654949_Bid_Class;
-import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Bid_Space;
+import com.zackehh.auction.U1654949_Lot_Space;
 import com.zackehh.auction.U1654949_Lot_Remover;
 import com.zackehh.ui.GenericNotifier;
 import com.zackehh.ui.components.BaseTable;
@@ -47,7 +47,7 @@ public class LotCard extends JPanel {
      * will not change throughout the lifecycle of the
      * card.
      */
-    private final U1654949_Lot_Class lot;
+    private final U1654949_Lot_Space lot;
 
     /**
      * The history as reflected by the bidTable object.
@@ -96,7 +96,7 @@ public class LotCard extends JPanel {
      * @param cards             the parent card layout
      * @param lotForCard        the lot this card is for
      */
-    public LotCard(final JPanel cards, U1654949_Lot_Class lotForCard) {
+    public LotCard(final JPanel cards, U1654949_Lot_Space lotForCard) {
         super();
 
         // Set required fields from params
@@ -104,10 +104,10 @@ public class LotCard extends JPanel {
         this.space = SpaceUtils.getSpace();
 
         // Refresh the lot, in case state has changed
-        U1654949_Lot_Class baseLot = lotForCard;
+        U1654949_Lot_Space baseLot = lotForCard;
         try {
-            U1654949_Lot_Class templateLot = new U1654949_Lot_Class(lotForCard.getId());
-            baseLot = (U1654949_Lot_Class) space.read(templateLot, null, Constants.SPACE_TIMEOUT);
+            U1654949_Lot_Space templateLot = new U1654949_Lot_Space(lotForCard.getId());
+            baseLot = (U1654949_Lot_Space) space.read(templateLot, null, Constants.SPACE_TIMEOUT);
         } catch(Exception e){
             e.printStackTrace(); // doesn't matter, UI will handle it
         }
@@ -124,7 +124,7 @@ public class LotCard extends JPanel {
             LotChangeListener lotListener = new LotChangeListener();
 
             // Generate the templates
-            U1654949_Bid_Class bidTemplate = new U1654949_Bid_Class(null, null, lot.getId(), null, null);
+            U1654949_Bid_Space bidTemplate = new U1654949_Bid_Space(null, null, lot.getId(), null);
             U1654949_Lot_Remover removerTemplate = new U1654949_Lot_Remover(lot.getId(), null, null);
 
             // Ensures all listeners are set to notify
@@ -161,13 +161,13 @@ public class LotCard extends JPanel {
         removeLotListener = new RemoveLotListener(lot);
 
         // Ensure a lot has not ended (this should always be true)
-        if(!lot.hasEnded()) {
+        if(!lot.isEnded()) {
 
             // If the user is the Seller of the lot
             if (UserUtils.getCurrentUser().equals(lot.getUser())) {
 
                 // If there are no bids, the Seller can remove the lot
-                if(lot.getLatestBid() == null){
+                if(lot.getLastBid() == null){
                     // Set the new text and add a removal listener
                     acceptBidOrRemoveLot.setText("Remove Lot");
                     acceptBidOrRemoveLot.addMouseListener(removeLotListener);
@@ -193,8 +193,8 @@ public class LotCard extends JPanel {
         String[] labels = {
             "ID",
             "User ID",
-            "Item Name",
-            "Item Description"
+            "Name",
+            "Description"
         };
 
         // Create a GridLayout matching the above labels length
@@ -232,14 +232,14 @@ public class LotCard extends JPanel {
         bidHistory = InterfaceUtils.getVectorBidMatrix(lot);
 
         // Behaviour changes based on active lots
-        if(lot.hasEnded()){
+        if(lot.isEnded()){
             // Display the winner and the price the item was won for
             currentPriceLabel = new JLabel("Won by " + bidHistory.get(0).get(0) + " -", SwingConstants.RIGHT);
-            currentPrice.setText(" Price: " + InterfaceUtils.getDoubleAsCurrency(lot.getCurrentPrice()));
+            currentPrice.setText(" Price: " + InterfaceUtils.getDoubleAsCurrency(lot.getPrice()));
         } else {
             // Display the current price of the item
             currentPriceLabel = new JLabel("Current Price: ", SwingConstants.RIGHT);
-            currentPrice.setText(InterfaceUtils.getDoubleAsCurrency(lot.getCurrentPrice()));
+            currentPrice.setText(InterfaceUtils.getDoubleAsCurrency(lot.getPrice()));
         }
 
         // Add the Current Price labels to the panel
@@ -283,17 +283,17 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 // Grab the latest version of the current lot and the latest bid from the Space
-                final U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(lot.getId()), null, Constants.SPACE_TIMEOUT);
-                final U1654949_Bid_Class latestBid = (U1654949_Bid_Class) space.read(new U1654949_Bid_Class(latestLot.getLatestBid()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) space.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, Constants.SPACE_TIMEOUT);
 
                 // Format the lot for the BaseTable
                 Vector<String> insertion = new Vector<String>(){{
-                    add(latestBid.isAnonymous(latestLot) ? "Anonymous User" : latestBid.getUser().getId());
+                    add(latestBid.getUser().getId());
                     add(InterfaceUtils.getDoubleAsCurrency(latestBid.getPrice()));
                 }};
 
                 // If there is a latest bid
-                if(latestLot.getLatestBid() != null && UserUtils.getCurrentUser().equals(lot.getUser())){
+                if(latestLot.getLastBid() != null && UserUtils.getCurrentUser().equals(lot.getUser())){
                     // Allow the Seller to now accept the bids instead of remove them
                     acceptBidOrRemoveLot.setText("Accept Latest Bid");
                     acceptBidOrRemoveLot.addMouseListener(acceptBidListener);
@@ -307,7 +307,7 @@ public class LotCard extends JPanel {
                 bidTable.revalidate();
 
                 // Set the new price to the Current Price label
-                currentPrice.setText(InterfaceUtils.getDoubleAsCurrency(latestLot.getCurrentPrice()));
+                currentPrice.setText(InterfaceUtils.getDoubleAsCurrency(latestLot.getPrice()));
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -1,7 +1,7 @@
 package com.zackehh.ui.listeners;
 
-import com.zackehh.auction.U1654949_Bid_Class;
-import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Bid_Space;
+import com.zackehh.auction.U1654949_Lot_Space;
 import com.zackehh.auction.U1654949_Bid_Counter;
 import com.zackehh.auction.U1654949_Lot_Updater;
 import com.zackehh.util.Constants;
@@ -31,7 +31,7 @@ public class PlaceBidListener extends MouseAdapter {
     /**
      * The lot the user wishes to place a bid on.
      */
-    private U1654949_Lot_Class lot;
+    private U1654949_Lot_Space lot;
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -49,7 +49,7 @@ public class PlaceBidListener extends MouseAdapter {
      *
      * @param lot       the lot being bid on
      */
-    public PlaceBidListener(U1654949_Lot_Class lot){
+    public PlaceBidListener(U1654949_Lot_Space lot){
         this.lot = lot;
         this.manager = SpaceUtils.getManager();
         this.space = SpaceUtils.getSpace();
@@ -75,8 +75,6 @@ public class PlaceBidListener extends MouseAdapter {
         // Add components to modal dialog
         modal.add(new JLabel("Bid Amount: "));
         modal.add(bidEntry);
-        modal.add(new JLabel("Private Bid? "));
-        modal.add(privateCheckBox);
 
         // Store user response to dialog
         int result = JOptionPane.showConfirmDialog(null, modal,
@@ -90,7 +88,7 @@ public class PlaceBidListener extends MouseAdapter {
             String bidString = bidEntry.getText();
 
             // If entered amount if a valid currency value and is higher than the last known bid
-            if(bidString.matches(Constants.CURRENCY_REGEX) && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getCurrentPrice()){
+            if(bidString.matches(Constants.CURRENCY_REGEX) && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()){
                 Transaction transaction = null;
                 try {
                     // Create a new Transaction
@@ -100,17 +98,17 @@ public class PlaceBidListener extends MouseAdapter {
                     // Refresh the secretary and the lot form the space
                     U1654949_Bid_Counter secretary = (U1654949_Bid_Counter) space.take(new U1654949_Bid_Counter(), transaction, Constants.SPACE_TIMEOUT);
                     // dispose of the previous lot item
-                    U1654949_Lot_Class updatedLot = (U1654949_Lot_Class) space.take(new U1654949_Lot_Class(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.take(new U1654949_Lot_Space(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
 
                     // Get the next bid id value
                     int bidNumber = secretary.countNewItem();
 
                     // Add the new fields to the lot
-                    updatedLot.getHistory().add(bidNumber);
+                    updatedLot.getBids().add(bidNumber);
                     updatedLot.setPrice(bid);
 
                     // Create a new bid with the new values
-                    final U1654949_Bid_Class newBid = new U1654949_Bid_Class(bidNumber, UserUtils.getCurrentUser(), lot.getId(), bid, !privateCheckBox.isSelected());
+                    final U1654949_Bid_Space newBid = new U1654949_Bid_Space(bidNumber, UserUtils.getCurrentUser(), lot.getId(), bid);
 
                     // Write all values back to the space
                     space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, Constants.TEMP_OBJECT);

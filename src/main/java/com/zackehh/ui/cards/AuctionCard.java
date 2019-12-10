@@ -1,7 +1,7 @@
 package com.zackehh.ui.cards;
 
-import com.zackehh.auction.U1654949_Bid_Class;
-import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Bid_Space;
+import com.zackehh.auction.U1654949_Lot_Space;
 import com.zackehh.auction.U1654949_Lot_Counter;
 import com.zackehh.auction.U1654949_Lot_Remover;
 import com.zackehh.auction.U1654949_Lot_Updater;
@@ -51,7 +51,7 @@ public class AuctionCard extends JPanel {
      * An ArrayList to keep track of the lots gathered from the
      * space.
      */
-    private final ArrayList<U1654949_Lot_Class> lots;
+    private final ArrayList<U1654949_Lot_Space> lots;
 
     /**
      * The table to keep track of any new lots entered.
@@ -67,7 +67,7 @@ public class AuctionCard extends JPanel {
      * @param lots              the list of lot items
      * @param cards             the cards layout
      */
-    public AuctionCard(final ArrayList<U1654949_Lot_Class> lots, final JPanel cards){
+    public AuctionCard(final ArrayList<U1654949_Lot_Space> lots, final JPanel cards){
         super(new BorderLayout());
 
         // Setup required parameters
@@ -117,13 +117,13 @@ public class AuctionCard extends JPanel {
                 if (event.getClickCount() == 2) {
 
                     // If the item has already ended, deny access and short circuit
-                    if (lots.get(row).hasEnded()) {
+                    if (lots.get(row).isEnded()) {
                         JOptionPane.showMessageDialog(null, "This item has already ended!");
                         return;
                     }
 
                     // Check for no longer available - should never be needed
-                    if (lots.get(row).isMarkedForRemoval()){
+                    if (lots.get(row).isRemoved()){
                         JOptionPane.showMessageDialog(null, "This item is no longer available!");
                         return;
                     }
@@ -188,7 +188,7 @@ public class AuctionCard extends JPanel {
                     final int lotNumber = secretary.countNewItem();
 
                     // Create a new lot based on the user input
-                    U1654949_Lot_Class newLot = new U1654949_Lot_Class(lotNumber, UserUtils.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
+                    U1654949_Lot_Space newLot = new U1654949_Lot_Space(lotNumber, UserUtils.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
 
                     // Write both the secretary and the lot to the space
                     space.write(newLot, transaction, Constants.LOT_LEASE_TIMEOUT);
@@ -271,7 +271,7 @@ public class AuctionCard extends JPanel {
             try {
                 // Grab the latest version of the IWsLotSecretary and the latest lot from the Space
                 U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Constants.SPACE_TIMEOUT);
-                U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(secretary.getItemCounter()), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(secretary.getItemCounter()), null, Constants.SPACE_TIMEOUT);
 
                 // Convert the lot to an Object[][]
                 Object[] insertion = latestLot.asObjectArray();
@@ -335,7 +335,7 @@ public class AuctionCard extends JPanel {
                 }
 
                 // Take the lot from the index
-                U1654949_Lot_Class lot = lots.get(currentIndex);
+                U1654949_Lot_Space lot = lots.get(currentIndex);
 
                 // Apply the new price to the lot
                 lot.setPrice(lotChange.getLotPrice());
@@ -391,7 +391,7 @@ public class AuctionCard extends JPanel {
                 // If the lot has ended
                 if(remover.isEnded()){
                     // Grab the lot at the current index
-                    U1654949_Lot_Class lot = lots.get(currentIndex);
+                    U1654949_Lot_Space lot = lots.get(currentIndex);
 
                     // Set the ended field to true
                     lot.setEnded(true);
@@ -402,7 +402,7 @@ public class AuctionCard extends JPanel {
 
                     // Display a dialog if the current user won the ended item
                     if(UserUtils.getCurrentUser().equals(lot.getUser())){
-                        JOptionPane.showMessageDialog(null, "You just won " + lot.getItemName() + "!");
+                        JOptionPane.showMessageDialog(null, "You just won " + lot.getName() + "!");
                     }
                 }
 
@@ -413,12 +413,12 @@ public class AuctionCard extends JPanel {
                 }
 
                 // Ensure that the matching lot is removed from the Space if it exists
-                space.takeIfExists(new U1654949_Lot_Class(remover.getId()), null, 1000);
+                space.takeIfExists(new U1654949_Lot_Space(remover.getId()), null, 1000);
 
                 // Remove all bids associated with the IWsLot
                 Object o;
                 do {
-                    o = space.takeIfExists(new U1654949_Bid_Class(remover.id), null, 1000);
+                    o = space.takeIfExists(new U1654949_Bid_Space(remover.id), null, 1000);
                 } while(o != null);
             } catch (Exception e) {
                 e.printStackTrace();

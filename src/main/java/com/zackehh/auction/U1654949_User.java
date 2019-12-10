@@ -1,10 +1,8 @@
 package com.zackehh.auction;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-/**
- * Class to store a user within the JavaSpace
- */
 public class U1654949_User implements Serializable {
 
     public final String id;
@@ -15,5 +13,15 @@ public class U1654949_User implements Serializable {
 
     public String getId(){
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        U1654949_User that = (U1654949_User) o;
+
+        return Objects.equals(this.id, that.id);
     }
 }

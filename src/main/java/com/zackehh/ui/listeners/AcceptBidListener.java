@@ -1,6 +1,6 @@
 package com.zackehh.ui.listeners;
 
-import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Lot_Space;
 import com.zackehh.auction.U1654949_Lot_Remover;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
@@ -31,7 +31,7 @@ public class AcceptBidListener extends MouseAdapter {
     /**
      * The lot which would be accepting the latest bid.
      */
-    private U1654949_Lot_Class lot;
+    private U1654949_Lot_Space lot;
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -53,7 +53,7 @@ public class AcceptBidListener extends MouseAdapter {
      * @param lot               the lot item to accept a bid for
      * @param currentPrice      the currentPrice label
      */
-    public AcceptBidListener(U1654949_Lot_Class lot, JLabel currentPrice){
+    public AcceptBidListener(U1654949_Lot_Space lot, JLabel currentPrice){
         this.currentPrice = currentPrice;
         this.lot = lot;
         this.manager = SpaceUtils.getManager();
@@ -92,7 +92,7 @@ public class AcceptBidListener extends MouseAdapter {
                 transaction = trc.transaction;
 
                 // Refresh the current lot from the Space
-                U1654949_Lot_Class updatedLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
 
                 // Mark the lot as ended, locally
                 updatedLot.setEnded(true);

@@ -1,6 +1,6 @@
 package com.zackehh.ui.listeners;
 
-import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Lot_Space;
 import com.zackehh.auction.U1654949_Lot_Remover;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
@@ -25,7 +25,7 @@ public class RemoveLotListener extends MouseAdapter {
     /**
      * The lot the user wishes to place a bid on.
      */
-    private U1654949_Lot_Class lot;
+    private U1654949_Lot_Space lot;
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -43,7 +43,7 @@ public class RemoveLotListener extends MouseAdapter {
      *
      * @param lot       the lot being bid on
      */
-    public RemoveLotListener(U1654949_Lot_Class lot){
+    public RemoveLotListener(U1654949_Lot_Space lot){
         this.lot = lot;
         this.manager = SpaceUtils.getManager();
         this.space = SpaceUtils.getSpace();
@@ -69,11 +69,11 @@ public class RemoveLotListener extends MouseAdapter {
             transaction = trc.transaction;
 
             // Refresh current IWsLot from the Space
-            U1654949_Lot_Class template = new U1654949_Lot_Class(lot.getId());
-            U1654949_Lot_Class updatedLot = (U1654949_Lot_Class) space.read(template, transaction, Constants.SPACE_TIMEOUT);
+            U1654949_Lot_Space template = new U1654949_Lot_Space(lot.getId());
+            U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(template, transaction, Constants.SPACE_TIMEOUT);
 
             // Mark the lot for removal
-            updatedLot.setMarkedForRemoval(true);
+            updatedLot.setRemoved(true);
 
             // Add a new IWsItemRemover recording the changes
             space.write(new U1654949_Lot_Remover(lot.getId(), false, true), transaction, Constants.TEMP_OBJECT);
