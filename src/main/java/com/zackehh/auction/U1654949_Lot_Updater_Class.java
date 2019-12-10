@@ -1,4 +1,4 @@
-package com.zackehh.auction.status;
+package com.zackehh.auction;
 
 import net.jini.core.entry.Entry;
 
@@ -13,7 +13,7 @@ import net.jini.core.entry.Entry;
  * refer to the changes which have been made to the IWsLot and
  * represent the changes which should be displayed on the UI.
  */
-public class IWsLotChange implements Entry {
+public class U1654949_Lot_Updater_Class implements Entry {
 
     /**
      * The id of the lot being changed.
@@ -24,12 +24,12 @@ public class IWsLotChange implements Entry {
     /**
      * Default constructor, used to match any instance of this class in the Space.
      */
-    public IWsLotChange(){ }
+    public U1654949_Lot_Updater_Class(){ }
 
     /**
      * Constructor to match purely based on id.
      */
-    public IWsLotChange(Integer id){
+    public U1654949_Lot_Updater_Class(Integer id){
         this.id = id;
     }
 
@@ -40,7 +40,7 @@ public class IWsLotChange implements Entry {
      * @param id            the id of the associated IWsLot
      * @param price         the new price of the item
      */
-    public IWsLotChange(Integer id, Double price){
+    public U1654949_Lot_Updater_Class(Integer id, Double price){
         this.id = id;
         this.price = price;
     }

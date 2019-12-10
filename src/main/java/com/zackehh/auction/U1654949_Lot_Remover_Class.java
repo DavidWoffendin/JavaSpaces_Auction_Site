@@ -1,4 +1,4 @@
-package com.zackehh.auction.status;
+package com.zackehh.auction;
 
 import net.jini.core.entry.Entry;
 
@@ -13,7 +13,7 @@ import net.jini.core.entry.Entry;
  * auction was ended as well as referencing the IWsLot id
  * associated with the changes.
  */
-public class IWsItemRemover implements Entry {
+public class U1654949_Lot_Remover_Class implements Entry {
 
     /**
      * The id of the lot being removed.
@@ -33,12 +33,12 @@ public class IWsItemRemover implements Entry {
     /**
      * Default constructor, used to match any instance of this class in the Space.
      */
-    public IWsItemRemover() { }
+    public U1654949_Lot_Remover_Class() { }
 
     /**
      * Constructor to match purely based on id.
      */
-    public IWsItemRemover(Integer id){
+    public U1654949_Lot_Remover_Class(Integer id){
         this.id = id;
     }
 
@@ -50,7 +50,7 @@ public class IWsItemRemover implements Entry {
      * @param ended         whether the lot ended due to a won auction
      * @param removed       whether the lot was removed by the Seller
      */
-    public IWsItemRemover(Integer id, Boolean ended, Boolean removed){
+    public U1654949_Lot_Remover_Class(Integer id, Boolean ended, Boolean removed){
         this.id = id;
         this.ended = ended;
         this.removed = removed;

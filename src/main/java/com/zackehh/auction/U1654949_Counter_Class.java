@@ -1,4 +1,4 @@
-package com.zackehh.auction.secretary;
+package com.zackehh.auction;
 
 import net.jini.core.entry.Entry;
 
@@ -9,7 +9,7 @@ import net.jini.core.entry.Entry;
  * be pulled and written to so it becomes trivial to find
  * the id numbers to associate with new classes.
  */
-public class IWsSecretary implements Entry {
+public class U1654949_Counter_Class implements Entry {
 
     /**
      * The id of the latest item in the Space.
@@ -19,7 +19,7 @@ public class IWsSecretary implements Entry {
     /**
      * Default constructor, used to match anything in the space.
      */
-    public IWsSecretary(){ }
+    public U1654949_Counter_Class(){ }
 
     /**
      * Takes a value for the id to start tracking from.
@@ -28,7 +28,7 @@ public class IWsSecretary implements Entry {
      *
      * @param itemNumber     the item number to start on
      */
-    public IWsSecretary(int itemNumber){
+    public U1654949_Counter_Class(int itemNumber){
         this.itemNumber = itemNumber;
     }
 

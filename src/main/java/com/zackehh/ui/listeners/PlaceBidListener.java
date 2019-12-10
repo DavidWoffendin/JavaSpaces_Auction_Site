@@ -1,9 +1,9 @@
 package com.zackehh.ui.listeners;
 
-import com.zackehh.auction.IWsBid;
-import com.zackehh.auction.IWsLot;
-import com.zackehh.auction.secretary.IWsBidSecretary;
-import com.zackehh.auction.status.IWsLotChange;
+import com.zackehh.auction.U1654949_Bid_Class;
+import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Bid_Counter_Class;
+import com.zackehh.auction.U1654949_Lot_Updater_Class;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
 import com.zackehh.util.UserUtils;
@@ -31,7 +31,7 @@ public class PlaceBidListener extends MouseAdapter {
     /**
      * The lot the user wishes to place a bid on.
      */
-    private IWsLot lot;
+    private U1654949_Lot_Class lot;
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -49,7 +49,7 @@ public class PlaceBidListener extends MouseAdapter {
      *
      * @param lot       the lot being bid on
      */
-    public PlaceBidListener(IWsLot lot){
+    public PlaceBidListener(U1654949_Lot_Class lot){
         this.lot = lot;
         this.manager = SpaceUtils.getManager();
         this.space = SpaceUtils.getSpace();
@@ -98,9 +98,9 @@ public class PlaceBidListener extends MouseAdapter {
                     transaction = trc.transaction;
 
                     // Refresh the secretary and the lot form the space
-                    IWsBidSecretary secretary = (IWsBidSecretary) space.take(new IWsBidSecretary(), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Bid_Counter_Class secretary = (U1654949_Bid_Counter_Class) space.take(new U1654949_Bid_Counter_Class(), transaction, Constants.SPACE_TIMEOUT);
                     // dispose of the previous lot item
-                    IWsLot updatedLot = (IWsLot) space.take(new IWsLot(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Class updatedLot = (U1654949_Lot_Class) space.take(new U1654949_Lot_Class(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
 
                     // Get the next bid id value
                     int bidNumber = secretary.addNewItem();
@@ -110,10 +110,10 @@ public class PlaceBidListener extends MouseAdapter {
                     updatedLot.setPrice(bid);
 
                     // Create a new bid with the new values
-                    final IWsBid newBid = new IWsBid(bidNumber, UserUtils.getCurrentUser(), lot.getId(), bid, !privateCheckBox.isSelected());
+                    final U1654949_Bid_Class newBid = new U1654949_Bid_Class(bidNumber, UserUtils.getCurrentUser(), lot.getId(), bid, !privateCheckBox.isSelected());
 
                     // Write all values back to the space
-                    space.write(new IWsLotChange(lot.getId(), bid), transaction, Constants.TEMP_OBJECT);
+                    space.write(new U1654949_Lot_Updater_Class(lot.getId(), bid), transaction, Constants.TEMP_OBJECT);
                     space.write(updatedLot, transaction, Constants.LOT_LEASE_TIMEOUT);
                     space.write(newBid, transaction, Constants.BID_LEASE_TIMEOUT);
                     space.write(secretary, transaction, Lease.FOREVER);

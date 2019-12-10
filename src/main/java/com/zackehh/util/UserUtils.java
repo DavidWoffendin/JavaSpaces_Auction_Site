@@ -1,6 +1,6 @@
 package com.zackehh.util;
 
-import com.zackehh.auction.IWsUser;
+import com.zackehh.auction.U1654949_User_Class;
 
 /**
  * An extremely simple class to store and keep track of the
@@ -15,7 +15,7 @@ public final class UserUtils {
      * not change throughout the lifecycle of the application,
      * however this is provided so we have the potential to.
      */
-    private static IWsUser user;
+    private static U1654949_User_Class user;
 
     /**
      * Default constructor which should not be called. All variables
@@ -31,7 +31,7 @@ public final class UserUtils {
      *
      * @return String       the current user
      */
-    public static IWsUser getCurrentUser(){
+    public static U1654949_User_Class getCurrentUser(){
         return user;
     }
 
@@ -41,8 +41,8 @@ public final class UserUtils {
      *
      * @param username      the username to set
      */
-    public static IWsUser setCurrentUser(String username){
-        user = new IWsUser(username);
+    public static U1654949_User_Class setCurrentUser(String username){
+        user = new U1654949_User_Class(username);
         System.out.println("Registered client for user: " + username);
         return user;
     }

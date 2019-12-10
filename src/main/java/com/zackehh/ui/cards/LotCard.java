@@ -1,8 +1,8 @@
 package com.zackehh.ui.cards;
 
-import com.zackehh.auction.IWsBid;
-import com.zackehh.auction.IWsLot;
-import com.zackehh.auction.status.IWsItemRemover;
+import com.zackehh.auction.U1654949_Bid_Class;
+import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Lot_Remover_Class;
 import com.zackehh.ui.GenericNotifier;
 import com.zackehh.ui.components.BaseTable;
 import com.zackehh.ui.listeners.AcceptBidListener;
@@ -47,7 +47,7 @@ public class LotCard extends JPanel {
      * will not change throughout the lifecycle of the
      * card.
      */
-    private final IWsLot lot;
+    private final U1654949_Lot_Class lot;
 
     /**
      * The history as reflected by the bidTable object.
@@ -96,7 +96,7 @@ public class LotCard extends JPanel {
      * @param cards             the parent card layout
      * @param lotForCard        the lot this card is for
      */
-    public LotCard(final JPanel cards, IWsLot lotForCard) {
+    public LotCard(final JPanel cards, U1654949_Lot_Class lotForCard) {
         super();
 
         // Set required fields from params
@@ -104,10 +104,10 @@ public class LotCard extends JPanel {
         this.space = SpaceUtils.getSpace();
 
         // Refresh the lot, in case state has changed
-        IWsLot baseLot = lotForCard;
+        U1654949_Lot_Class baseLot = lotForCard;
         try {
-            IWsLot templateLot = new IWsLot(lotForCard.getId());
-            baseLot = (IWsLot) space.read(templateLot, null, Constants.SPACE_TIMEOUT);
+            U1654949_Lot_Class templateLot = new U1654949_Lot_Class(lotForCard.getId());
+            baseLot = (U1654949_Lot_Class) space.read(templateLot, null, Constants.SPACE_TIMEOUT);
         } catch(Exception e){
             e.printStackTrace(); // doesn't matter, UI will handle it
         }
@@ -124,8 +124,8 @@ public class LotCard extends JPanel {
             LotChangeListener lotListener = new LotChangeListener();
 
             // Generate the templates
-            IWsBid bidTemplate = new IWsBid(null, null, lot.getId(), null, null);
-            IWsItemRemover removerTemplate = new IWsItemRemover(lot.getId(), null, null);
+            U1654949_Bid_Class bidTemplate = new U1654949_Bid_Class(null, null, lot.getId(), null, null);
+            U1654949_Lot_Remover_Class removerTemplate = new U1654949_Lot_Remover_Class(lot.getId(), null, null);
 
             // Ensures all listeners are set to notify
             space.notify(bidTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
@@ -283,8 +283,8 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 // Grab the latest version of the current lot and the latest bid from the Space
-                final IWsLot latestLot = (IWsLot) space.read(new IWsLot(lot.getId()), null, Constants.SPACE_TIMEOUT);
-                final IWsBid latestBid = (IWsBid) space.read(new IWsBid(latestLot.getLatestBid()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(lot.getId()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Bid_Class latestBid = (U1654949_Bid_Class) space.read(new U1654949_Bid_Class(latestLot.getLatestBid()), null, Constants.SPACE_TIMEOUT);
 
                 // Format the lot for the BaseTable
                 Vector<String> insertion = new Vector<String>(){{
@@ -336,7 +336,7 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 // Read the latest IWsItemRemover from the Space (there should only be the one we want)
-                final IWsItemRemover remover = (IWsItemRemover) space.read(new IWsItemRemover(lot.getId()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Lot_Remover_Class remover = (U1654949_Lot_Remover_Class) space.read(new U1654949_Lot_Remover_Class(lot.getId()), null, Constants.SPACE_TIMEOUT);
 
                 // If it was removed due to being won
                 if(remover.hasEnded()){

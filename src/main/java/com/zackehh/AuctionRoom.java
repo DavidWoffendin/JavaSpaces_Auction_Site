@@ -1,8 +1,8 @@
 package com.zackehh;
 
-import com.zackehh.auction.IWsLot;
-import com.zackehh.auction.secretary.IWsBidSecretary;
-import com.zackehh.auction.secretary.IWsLotSecretary;
+import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_Bid_Counter_Class;
+import com.zackehh.auction.U1654949_Lot_Counter_Class;
 import com.zackehh.ui.cards.AuctionCard;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
@@ -29,7 +29,7 @@ public class AuctionRoom extends JFrame {
     /**
      * A list of lot items which are being tracked in the space.
      */
-    private final ArrayList<IWsLot> lots = new ArrayList<IWsLot>();
+    private final ArrayList<U1654949_Lot_Class> lots = new ArrayList<U1654949_Lot_Class>();
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -79,15 +79,15 @@ public class AuctionRoom extends JFrame {
 
         try {
             // Ensure an IWsLotSecretary lives in the Space
-            Object o = space.read(new IWsLotSecretary(), null, 1000);
+            Object o = space.read(new U1654949_Lot_Counter_Class(), null, 1000);
             if(o == null){
-                space.write(new IWsLotSecretary(0), null, Lease.FOREVER);
+                space.write(new U1654949_Lot_Counter_Class(0), null, Lease.FOREVER);
             }
 
             // Ensure an IWsBidSecretary lives in the Space
-            o = space.read(new IWsBidSecretary(), null, 1000);
+            o = space.read(new U1654949_Bid_Counter_Class(), null, 1000);
             if(o == null){
-                space.write(new IWsBidSecretary(0), null, Lease.FOREVER);
+                space.write(new U1654949_Bid_Counter_Class(0), null, Lease.FOREVER);
             }
         } catch(Exception e){
             e.printStackTrace();
@@ -134,17 +134,17 @@ public class AuctionRoom extends JFrame {
                     // Read the latest known version of the IWsSecretary from the Space
                     // It could be necessary to re-read this on each iteration on the loop,
                     // but it does not seem to be needed for an application of this scale.
-                    IWsLotSecretary secretary = (IWsLotSecretary) space.read(new IWsLotSecretary(), null, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Counter_Class secretary = (U1654949_Lot_Counter_Class) space.read(new U1654949_Lot_Counter_Class(), null, Constants.SPACE_TIMEOUT);
 
                     int i = 0;
                     // Loop for all item ids
                     while(i <= secretary.getItemNumber()) {
 
                         // Search for the next template in the Space
-                        IWsLot template = new IWsLot(i++ + 1, null, null, null, null, null, false, false);
+                        U1654949_Lot_Class template = new U1654949_Lot_Class(i++ + 1, null, null, null, null, null, false, false);
 
                         // If the object exists in the space
-                        IWsLot latestLot = (IWsLot) space.readIfExists(template, null, 1000);
+                        U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.readIfExists(template, null, 1000);
 
                         // Add any existing lots to the tables
                         if (latestLot != null) {

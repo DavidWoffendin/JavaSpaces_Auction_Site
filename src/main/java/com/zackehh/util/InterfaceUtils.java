@@ -1,8 +1,8 @@
 package com.zackehh.util;
 
-import com.zackehh.auction.IWsBid;
-import com.zackehh.auction.IWsLot;
-import com.zackehh.auction.IWsUser;
+import com.zackehh.auction.U1654949_Bid_Class;
+import com.zackehh.auction.U1654949_Lot_Class;
+import com.zackehh.auction.U1654949_User_Class;
 import net.jini.space.JavaSpace;
 
 import javax.swing.text.JTextComponent;
@@ -78,15 +78,15 @@ public class InterfaceUtils {
      * @param  lot          the IWsLot to gather history for
      * @return ArrayList    the list of bids associated
      */
-    public static ArrayList<IWsBid> getBidHistory(IWsLot lot) {
+    public static ArrayList<U1654949_Bid_Class> getBidHistory(U1654949_Lot_Class lot) {
         JavaSpace space = SpaceUtils.getSpace();
 
         // Initialise a list to store history
-        ArrayList<IWsBid> bidHistory = new ArrayList<IWsBid>();
+        ArrayList<U1654949_Bid_Class> bidHistory = new ArrayList<U1654949_Bid_Class>();
 
         try {
             // Fetch the latest version of the lot
-            IWsLot refreshedLot = (IWsLot) space.read(new IWsLot(lot.getId()), null, Constants.SPACE_TIMEOUT);
+            U1654949_Lot_Class refreshedLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(lot.getId()), null, Constants.SPACE_TIMEOUT);
 
             // Get the history from the lot
             ArrayList<Integer> bids = refreshedLot.getHistory();
@@ -99,12 +99,12 @@ public class InterfaceUtils {
             // Add all bids by id
             for(Integer bidId : bids){
                 // Lookup the bid with the given id
-                IWsBid template = new IWsBid(bidId, null, lot.getId(), null, null);
-                IWsBid bidItem = ((IWsBid) space.read(template, null, Constants.SPACE_TIMEOUT));
+                U1654949_Bid_Class template = new U1654949_Bid_Class(bidId, null, lot.getId(), null, null);
+                U1654949_Bid_Class bidItem = ((U1654949_Bid_Class) space.read(template, null, Constants.SPACE_TIMEOUT));
 
                 // If the bid is anonymous, reset the user (locally)
                 if(bidItem.isAnonymous(refreshedLot)) {
-                    bidItem.setUser(new IWsUser("Anonymous Buyer"));
+                    bidItem.setUser(new U1654949_User_Class("Anonymous Buyer"));
                 }
 
                 // Add the bid to the history list
@@ -115,9 +115,9 @@ public class InterfaceUtils {
         }
 
         // Sort bids by price, just in case order is incorrect
-        Collections.sort(bidHistory, new Comparator<IWsBid>() {
+        Collections.sort(bidHistory, new Comparator<U1654949_Bid_Class>() {
             @Override
-            public int compare(IWsBid bid1, IWsBid bid2) {
+            public int compare(U1654949_Bid_Class bid1, U1654949_Bid_Class bid2) {
                 return bid2.getPrice().compareTo(bid1.getPrice());
             }
         });
@@ -133,16 +133,16 @@ public class InterfaceUtils {
      * @param  lot          the IWsLot to gather history for
      * @return Vector       a matrix of IWsBid values
      */
-    public static Vector<Vector<String>> getVectorBidMatrix(IWsLot lot){
+    public static Vector<Vector<String>> getVectorBidMatrix(U1654949_Lot_Class lot){
         // Get the list of historic bids
-        ArrayList<IWsBid> bids = getBidHistory(lot);
+        ArrayList<U1654949_Bid_Class> bids = getBidHistory(lot);
 
         // Initialise empty Vector
         Vector<Vector<String>> values = new Vector<Vector<String>>();
 
         for(int iY = 0; iY < bids.size(); iY++){
             // Grab the bid at the index
-            final IWsBid bid = bids.get(iY);
+            final U1654949_Bid_Class bid = bids.get(iY);
 
             // Add each bid as a vector
             values.add(iY, new Vector<String>(){{

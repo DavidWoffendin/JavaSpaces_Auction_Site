@@ -12,7 +12,7 @@ import java.util.Objects;
  * Ties to a user and keeps track of whether the bid was a private
  * bid or not.
  */
-public class IWsBid implements Entry {
+public class U1654949_Bid_Class implements Entry {
 
     /**
      * Tracks whether the bid is anonymous.
@@ -37,17 +37,17 @@ public class IWsBid implements Entry {
     /**
      * The user who bid on the item.
      */
-    public IWsUser user;
+    public U1654949_User_Class user;
 
     /**
      * Default constructor, used to match anything in the space.
      */
-    public IWsBid(){ }
+    public U1654949_Bid_Class(){ }
 
     /**
      * Constructor to match purely based on id.
      */
-    public IWsBid(Integer id){
+    public U1654949_Bid_Class(Integer id){
         this.id = id;
     }
 
@@ -61,7 +61,7 @@ public class IWsBid implements Entry {
      * @param price         the price the user has bid on the item
      * @param visible       whether this bid is anonymous or not
      */
-    public IWsBid(Integer id, IWsUser user, Integer itemId, Double price, Boolean visible){
+    public U1654949_Bid_Class(Integer id, U1654949_User_Class user, Integer itemId, Double price, Boolean visible){
         this.id = id;
         this.user = user;
         this.itemId = itemId;
@@ -83,7 +83,7 @@ public class IWsBid implements Entry {
      *
      * @return String       the user id
      */
-    public IWsUser getUser() {
+    public U1654949_User_Class getUser() {
         return user;
     }
 
@@ -120,7 +120,7 @@ public class IWsBid implements Entry {
      *
      * @return true     if the bid is anonymous
      */
-    public Boolean isAnonymous(IWsLot lot) {
+    public Boolean isAnonymous(U1654949_Lot_Class lot) {
         return  lot.getId().equals(getItemId()) &&
                 !isPublic() &&
                 !UserUtils.getCurrentUser().equals(getUser()) &&
@@ -132,7 +132,7 @@ public class IWsBid implements Entry {
      *
      * @param id        the Integer id
      */
-    public IWsBid setId(Integer id){
+    public U1654949_Bid_Class setId(Integer id){
         this.id = id;
         return this;
     }
@@ -142,7 +142,7 @@ public class IWsBid implements Entry {
      *
      * @param user      the IWsUser user
      */
-    public IWsBid setUser(IWsUser user){
+    public U1654949_Bid_Class setUser(U1654949_User_Class user){
         this.user = user;
         return this;
     }
@@ -153,7 +153,7 @@ public class IWsBid implements Entry {
      * @param itemId    the Integer itemId
      */
     @SuppressWarnings("unused")
-    public IWsBid setItemId(Integer itemId){
+    public U1654949_Bid_Class setItemId(Integer itemId){
         this.itemId = itemId;
         return this;
     }
@@ -164,7 +164,7 @@ public class IWsBid implements Entry {
      * @param price     the Double price
      */
     @SuppressWarnings("unused")
-    public IWsBid setPrice(Double price){
+    public U1654949_Bid_Class setPrice(Double price){
         this.price = price;
         return this;
     }
@@ -175,7 +175,7 @@ public class IWsBid implements Entry {
      * @param visible   the Boolean visible
      */
     @SuppressWarnings("unused")
-    public IWsBid setVisible(Boolean visible){
+    public U1654949_Bid_Class setVisible(Boolean visible){
         this.visible = visible;
         return this;
     }
@@ -191,7 +191,7 @@ public class IWsBid implements Entry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IWsBid that = (IWsBid) o;
+        U1654949_Bid_Class that = (U1654949_Bid_Class) o;
 
         return  Objects.equals(this.visible, that.visible) &&
                 Objects.equals(this.id, that.id) &&

@@ -9,7 +9,7 @@ import java.util.Objects;
  * allows for easier expansion in the case of user passwords
  * and other user based properties.
  */
-public class IWsUser implements Serializable {
+public class U1654949_User_Class implements Serializable {
 
     /**
      * The id of the user
@@ -21,7 +21,7 @@ public class IWsUser implements Serializable {
      *
      * @param id        the user id
      */
-    public IWsUser(String id){
+    public U1654949_User_Class(String id){
         this.id = id;
     }
 
@@ -45,7 +45,7 @@ public class IWsUser implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IWsUser that = (IWsUser) o;
+        U1654949_User_Class that = (U1654949_User_Class) o;
 
         return Objects.equals(this.id, that.id);
     }

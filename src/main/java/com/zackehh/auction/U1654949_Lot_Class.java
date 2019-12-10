@@ -13,7 +13,7 @@ import java.util.Objects;
  * easy retrieval from the space. Ties to a user so we know who
  * is eligible to accept a given bid.
  */
-public class IWsLot implements Entry {
+public class U1654949_Lot_Class implements Entry {
 
     /**
      * The unique id of this lot item.
@@ -44,7 +44,7 @@ public class IWsLot implements Entry {
     /**
      * The seller of this item.
      */
-    public IWsUser user;
+    public U1654949_User_Class user;
 
     /**
      * Whether the auction for this lot has finished.
@@ -59,12 +59,12 @@ public class IWsLot implements Entry {
     /**
      * Default constructor, used to match anything in the space.
      */
-    public IWsLot(){ }
+    public U1654949_Lot_Class(){ }
 
     /**
      * Constructor to match purely based on id.
      */
-    public IWsLot(Integer id){
+    public U1654949_Lot_Class(Integer id){
         this.id = id;
     }
 
@@ -80,7 +80,7 @@ public class IWsLot implements Entry {
      * @param description   a short description of the item
      * @param ended         whether the lot has ended
      */
-    public IWsLot(Integer id, IWsUser user, ArrayList<Integer> history, String name, Double price, String description, Boolean ended, Boolean markedForRemoval){
+    public U1654949_Lot_Class(Integer id, U1654949_User_Class user, ArrayList<Integer> history, String name, Double price, String description, Boolean ended, Boolean markedForRemoval){
         this.id = id;
         this.user = user;
         this.history = history;
@@ -105,7 +105,7 @@ public class IWsLot implements Entry {
      *
      * @return IWsUser      the user
      */
-    public IWsUser getUser(){
+    public U1654949_User_Class getUser(){
         return user;
     }
 
@@ -182,7 +182,7 @@ public class IWsLot implements Entry {
      *
      * @param id            the Integer id
      */
-    public IWsLot setId(Integer id){
+    public U1654949_Lot_Class setId(Integer id){
         this.id = id;
         return this;
     }
@@ -192,7 +192,7 @@ public class IWsLot implements Entry {
      *
      * @param user          the IWsUser user
      */
-    public IWsLot setUser(IWsUser user){
+    public U1654949_Lot_Class setUser(U1654949_User_Class user){
         this.user = user;
         return this;
     }
@@ -203,7 +203,7 @@ public class IWsLot implements Entry {
      * @param history       the ArrayList history
      */
     @SuppressWarnings("unused")
-    public IWsLot setHistory(ArrayList<Integer> history){
+    public U1654949_Lot_Class setHistory(ArrayList<Integer> history){
         this.history = history;
         return this;
     }
@@ -214,7 +214,7 @@ public class IWsLot implements Entry {
      * @param name          the String name
      */
     @SuppressWarnings("unused")
-    public IWsLot setName(String name){
+    public U1654949_Lot_Class setName(String name){
         this.name = name;
         return this;
     }
@@ -224,7 +224,7 @@ public class IWsLot implements Entry {
      *
      * @param price         the Double price
      */
-    public IWsLot setPrice(Double price){
+    public U1654949_Lot_Class setPrice(Double price){
         this.price = price;
         return this;
     }
@@ -235,7 +235,7 @@ public class IWsLot implements Entry {
      * @param description   the String description
      */
     @SuppressWarnings("unused")
-    public IWsLot setDescription(String description){
+    public U1654949_Lot_Class setDescription(String description){
         this.description = description;
         return this;
     }
@@ -245,7 +245,7 @@ public class IWsLot implements Entry {
      *
      * @param ended         the Boolean ended
      */
-    public IWsLot setEnded(Boolean ended){
+    public U1654949_Lot_Class setEnded(Boolean ended){
         this.ended = ended;
         return this;
     }
@@ -255,7 +255,7 @@ public class IWsLot implements Entry {
      *
      * @param markedForRemoval  the Boolean markedForRemoval
      */
-    public IWsLot setMarkedForRemoval(Boolean markedForRemoval){
+    public U1654949_Lot_Class setMarkedForRemoval(Boolean markedForRemoval){
         this.markedForRemoval = markedForRemoval;
         return this;
     }
@@ -302,7 +302,7 @@ public class IWsLot implements Entry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IWsLot that = (IWsLot) o;
+        U1654949_Lot_Class that = (U1654949_Lot_Class) o;
 
         return  Objects.equals(this.id, that.id) &&
                 Objects.equals(this.user, that.user) &&
