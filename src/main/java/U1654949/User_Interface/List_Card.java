@@ -1,17 +1,13 @@
 package U1654949.User_Interface;
 
-import U1654949.Space_Auction_Items.U1654949_Lot_Counter;
-import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
-import U1654949.Space_Auction_Items.U1654949_Lot_Updater;
-import U1654949.User_Interface.Defaults.Default_Table;
-import U1654949.User_Interface.Defaults.Default_Text;
 import U1654949.Default_Variables;
-import U1654949.User_Interface.Interface_Helpers.Common_Functions;
+import U1654949.Space_Auction_Items.*;
 import U1654949.Space_Utils;
 import U1654949.User;
-import U1654949.Space_Auction_Items.U1654949_Bid_Space;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
-import U1654949.User_Interface.Interface_Helpers.GenericNotifier;
+import U1654949.User_Interface.Defaults.Default_Table;
+import U1654949.User_Interface.Defaults.Default_Text;
+import U1654949.User_Interface.Interface_Helpers.Common_Functions;
+import U1654949.User_Interface.Interface_Helpers.Notifier;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -253,7 +249,7 @@ public class List_Card extends JPanel {
      * also for marking existing lots as ended, or updating
      * their current price.
      */
-    private class NewLotNotifier extends GenericNotifier {
+    private class NewLotNotifier extends Notifier {
 
         /**
          * Overrides the parent notify method to allow the
@@ -301,7 +297,7 @@ public class List_Card extends JPanel {
 
     }
 
-    private class LotChangeNotifier extends GenericNotifier {
+    private class LotChangeNotifier extends Notifier {
 
         /**
          * Overrides the parent notify method to allow the
@@ -360,7 +356,7 @@ public class List_Card extends JPanel {
      * ensure that all connected clients are updated with the removed lot,
      * without just removing the lot from the initial client.
      */
-    private class RemoveLotFromAuctionNotifier extends GenericNotifier {
+    private class RemoveLotFromAuctionNotifier extends Notifier {
 
         /**
          * Custom notify implementation which will fetch the current lot from

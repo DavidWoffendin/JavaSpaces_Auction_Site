@@ -1,17 +1,13 @@
 package U1654949.User_Interface;
 
+import U1654949.Default_Variables;
 import U1654949.Space_Auction_Items.U1654949_Bid_Space;
 import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
 import U1654949.Space_Auction_Items.U1654949_Lot_Space;
-import U1654949.User_Interface.Interface_Helpers.GenericNotifier;
-import U1654949.User_Interface.Defaults.Default_Table;
-import U1654949.User_Interface.Interface_Helpers.PlaceBidListener;
-import U1654949.Default_Variables;
-import U1654949.User_Interface.Interface_Helpers.Common_Functions;
 import U1654949.Space_Utils;
 import U1654949.User;
-import U1654949.User_Interface.Interface_Helpers.AcceptBidListener;
-import U1654949.User_Interface.Interface_Helpers.RemoveLotListener;
+import U1654949.User_Interface.Defaults.Default_Table;
+import U1654949.User_Interface.Interface_Helpers.*;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
@@ -81,7 +77,7 @@ public class Lot_Card extends JPanel {
      */
     private final JPanel cards;
 
-    private final AcceptBidListener acceptBidListener;
+    private final AcceptButtonListener acceptButtonListener;
 
     private final RemoveLotListener removeLotListener;
 
@@ -157,7 +153,7 @@ public class Lot_Card extends JPanel {
         currentPrice = new JLabel();
 
         // Setup the removal and accept bid listeners
-        acceptBidListener = new AcceptBidListener(lot, currentPrice);
+        acceptButtonListener = new AcceptButtonListener(lot, currentPrice);
         removeLotListener = new RemoveLotListener(lot);
 
         // Ensure a lot has not ended (this should always be true)
@@ -173,7 +169,7 @@ public class Lot_Card extends JPanel {
                     acceptBidOrRemoveLot.addMouseListener(removeLotListener);
                 } else {
                     // Add a listener to accept the last bid
-                    acceptBidOrRemoveLot.addMouseListener(acceptBidListener);
+                    acceptBidOrRemoveLot.addMouseListener(acceptButtonListener);
                 }
 
                 // Add the label to the main frame
@@ -270,7 +266,7 @@ public class Lot_Card extends JPanel {
      * seller to now accept the latest bid if it is the first
      * bid added to the lot.
      */
-    private class NewBidListener extends GenericNotifier {
+    private class NewBidListener extends Notifier {
 
         /**
          * Updates the UI with the new bid added to the lot.
@@ -296,7 +292,7 @@ public class Lot_Card extends JPanel {
                 if(latestLot.getLastBid() != null && User.getCurrentUser().equals(lot.getUser())){
                     // Allow the Seller to now accept the bids instead of remove them
                     acceptBidOrRemoveLot.setText("Accept Latest Bid");
-                    acceptBidOrRemoveLot.addMouseListener(acceptBidListener);
+                    acceptBidOrRemoveLot.addMouseListener(acceptButtonListener);
                     acceptBidOrRemoveLot.removeMouseListener(removeLotListener);
                 }
 
@@ -321,7 +317,7 @@ public class Lot_Card extends JPanel {
      * has ended. This is to ensure ended lots are updated
      * across all connected clients and stay in sync.
      */
-    private class LotChangeListener extends GenericNotifier {
+    private class LotChangeListener extends Notifier {
 
         /**
          * Fetches the latest version of the lot from the space

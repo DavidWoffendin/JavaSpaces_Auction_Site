@@ -1,10 +1,10 @@
 package U1654949;
 
-import net.jini.space.JavaSpace;
-import net.jini.core.transaction.server.TransactionManager;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
+import net.jini.core.transaction.server.TransactionManager;
+import net.jini.space.JavaSpace;
 
 import java.io.IOException;
 
