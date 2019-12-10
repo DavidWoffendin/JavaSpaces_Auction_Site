@@ -8,6 +8,7 @@ import U1654949.User_Interface.Defaults.Default_Table;
 import U1654949.User_Interface.Defaults.Default_Text;
 import U1654949.User_Interface.Interface_Helpers.Common_Functions;
 import U1654949.User_Interface.Interface_Helpers.Notifier;
+
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -24,73 +25,35 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-/**
- * The main body of the application's UI. This card displays
- * the list of lots in the auction currently, along with their
- * information. Clicking a row allows the user to go to a card
- * specifically based on the chosen lot to allow bids etc.
- * This card also provides a way for a user to add a new lot.
- */
 public class List_Card extends JPanel {
 
-    /**
-     * The common JavaSpace instance, stored privately.
-     */
     private final JavaSpace space;
-
-    /**
-     * The common TransactionManager instance, stored privately.
-     */
     private final TransactionManager manager;
-
-    /**
-     * An ArrayList to keep track of the lots gathered from the
-     * space.
-     */
     private final ArrayList<U1654949_Lot_Space> lots;
-
-    /**
-     * The table to keep track of any new lots entered.
-     */
     private final Default_Table lotTable;
 
-    /**
-     * Initialize a new AuctionCard with a list of initial lots
-     * to display. Provides access to the list of lots and the cards
-     * parent to enable addition/removal of cards representing the
-     * bid card.
-     *
-     * @param lots              the list of lot items
-     * @param cards             the cards layout
-     */
     public List_Card(final ArrayList<U1654949_Lot_Space> lots, final JPanel cards){
         super(new BorderLayout());
 
-        // Setup required parameters
         this.lots = lots;
         this.manager = Space_Utils.getManager();
         this.space = Space_Utils.getSpace();
 
-        // Setup the main Grid layout to contain the input form
         JPanel fieldInputPanel = new JPanel(new GridLayout(4, 2));
         fieldInputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Set item name input
         final JTextField itemNameIn = new JTextField("", 12);
         fieldInputPanel.add(new JLabel("Name of Item: "));
         fieldInputPanel.add(itemNameIn);
 
-        // Set item description input
         final JTextField itemDescriptionIn = new JTextField("", 1);
         fieldInputPanel.add(new JLabel("Item description: "));
         fieldInputPanel.add(itemDescriptionIn);
 
-        // Set starting price input
         final JTextField startingPriceIn = new JTextField("", 6);
         fieldInputPanel.add(new JLabel("Starting Price: "));
         fieldInputPanel.add(startingPriceIn);
 
-        // Setup result output fields
         final Default_Text resultTextOut = new Default_Text();
         fieldInputPanel.add(new JLabel("Result: "));
         fieldInputPanel.add(resultTextOut);
@@ -98,56 +61,42 @@ public class List_Card extends JPanel {
         // Add the layout to the panel
         add(fieldInputPanel, BorderLayout.NORTH);
 
-        // Create an initial base table with the given column names
         lotTable = new Default_Table(new String[0][5], new String[] {
                 "Lot ID", "Item Name", "Seller ID", "Current Price", "Status"
         });
 
-        // Add listener to the row click in the table
         lotTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent event) {
-                // Calculate the row based on the mouse positioning
                 int row = lotTable.rowAtPoint(event.getPoint());
 
-                // Only activate the listener on a double click
                 if (event.getClickCount() == 2) {
 
-                    // If the item has already ended, deny access and short circuit
                     if (lots.get(row).isEnded()) {
                         JOptionPane.showMessageDialog(null, "This item has already ended!");
                         return;
                     }
 
-                    // Check for no longer available - should never be needed
                     if (lots.get(row).isRemoved()){
                         JOptionPane.showMessageDialog(null, "This item is no longer available!");
                         return;
                     }
-
-                    // Add a new card, using the selected lot
                     cards.add(new Lot_Card(cards, lots.get(row)), Default_Variables.BID_CARD);
-
-                    // Display the new card
                     ((CardLayout) cards.getLayout()).show(cards, Default_Variables.BID_CARD);
                 }
             }
         });
 
-        // Add the table to a scrolling pane
         JScrollPane itemListPanel = new JScrollPane(
-            lotTable,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+                lotTable,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
 
-        // Add the scrolling pane to the main panel
         add(itemListPanel, BorderLayout.CENTER);
 
-        // Create an "Add Auction" button
         JButton addLotButton = new JButton();
         addLotButton.setText("Add Auction Item");
 
-        // Set the required listener
         addLotButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 // Refresh any prior result text
@@ -159,13 +108,11 @@ public class List_Card extends JPanel {
                 Number startingPrice = Common_Functions.getTextAsNumber(startingPriceIn);
                 Double potentialDouble = startingPrice == null ? 0 : startingPrice.doubleValue();
 
-                // Validate item details, short circuit if not met
                 if(itemName.length() == 0 || itemDescription.length() == 0){
                     resultTextOut.setText("Invalid item details!");
                     return;
                 }
 
-                // Validate price, short circuit if not met
                 if(startingPrice == null || potentialDouble == 0){
                     resultTextOut.setText("Invalid price!");
                     return;
@@ -173,32 +120,22 @@ public class List_Card extends JPanel {
 
                 Transaction transaction = null;
                 try {
-                    // Create a Transaction to handle the modifications
                     Transaction.Created trc = TransactionFactory.create(manager, 3000);
                     transaction = trc.transaction;
 
-                    // Pull the latest IWsLotSecretary from the space
-                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Default_Variables.SPACE_TIMEOUT);
+                    U1654949_Lot_Counter Counter = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Default_Variables.SPACE_TIMEOUT);
 
-                    // Increment and retrieve the new item id
-                    final int lotNumber = secretary.countNewItem();
+                    final int lotNumber = Counter.countNewItem();
 
-                    // Create a new lot based on the user input
                     U1654949_Lot_Space newLot = new U1654949_Lot_Space(lotNumber, User.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
 
-                    // Write both the secretary and the lot to the space
                     space.write(newLot, transaction, Default_Variables.LOT_LEASE_TIMEOUT);
-                    space.write(secretary, transaction, Lease.FOREVER);
+                    space.write(Counter, transaction, Lease.FOREVER);
 
-                    // Commit the Transaction
                     transaction.commit();
-
-                    // Reset the input fields
                     itemNameIn.setText("");
                     itemDescriptionIn.setText("");
                     startingPriceIn.setText("");
-
-                    // Output a success message
                     resultTextOut.setText("Added Lot #" + lotNumber + "!");
 
                     lots.add(newLot);
@@ -206,7 +143,6 @@ public class List_Card extends JPanel {
                 } catch(Exception e) {
                     e.printStackTrace();
                     try {
-                        // Abort existing Transactions
                         if(transaction != null){
                             transaction.abort();
                         }
@@ -218,7 +154,6 @@ public class List_Card extends JPanel {
             }
         });
 
-        // Add the "Add Lot" button to the main frame
         JPanel bidListingPanel = new JPanel(new FlowLayout());
         bidListingPanel.add(addLotButton);
         add(bidListingPanel, BorderLayout.SOUTH);
@@ -233,41 +168,20 @@ public class List_Card extends JPanel {
         }
     }
 
-    /**
-     * Returns the table model of lotTable for access outside
-     * this class. This is used to populate the table initially.
-     *
-     * @return DefaultTableModel    the table model
-     */
     public DefaultTableModel getTableModel(){
         return ((DefaultTableModel) lotTable.getModel());
     }
 
-    /**
-     * The notifier for when a new lot enters the space. This
-     * contains handling for adding new lots to table, but
-     * also for marking existing lots as ended, or updating
-     * their current price.
-     */
     private class NewLotNotifier extends Notifier {
 
-        /**
-         * Overrides the parent notify method to allow the
-         * space to notify when a new lot is added to the
-         * number. This will either add the new lot to the
-         * table, or will update the existing record with
-         * the new information.
-         *
-         * @param ev        the remote event
-         */
         @Override
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = getTableModel();
 
             try {
-                // Grab the latest version of the IWsLotSecretary and the latest lot from the Space
-                U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
-                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(secretary.getItemCounter()), null, Default_Variables.SPACE_TIMEOUT);
+                // Grab the latest version of the U1654949_LotCounter and the latest lot from the Space
+                U1654949_Lot_Counter Counter = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
+                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(Counter.getItemCounter()), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Convert the lot to an Object[][]
                 Object[] insertion = latestLot.asObjectArray();
@@ -275,7 +189,7 @@ public class List_Card extends JPanel {
                 // Ensure the lot id does not already exist
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
-                    if(lots.get(i).getId().intValue() == latestLot.getId().intValue()){
+                    if (lots.get(i).getId() == latestLot.getId()) {
                         currentIndex = i;
                         break;
                     }
@@ -299,27 +213,18 @@ public class List_Card extends JPanel {
 
     private class LotChangeNotifier extends Notifier {
 
-        /**
-         * Overrides the parent notify method to allow the
-         * space to notify when a new lot is added to the
-         * number. This will either add the new lot to the
-         * table, or will update the existing record with
-         * the new information.
-         *
-         * @param ev        the remote event
-         */
         @Override
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = getTableModel();
 
             try {
-                // Read the latest IWsLotChange object from the Space (there should only be one)
+                // Read the latest U1654949_LotChange object from the Space (there should only be one)
                 U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) space.read(new U1654949_Lot_Updater(), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Find the existing index of the lot with a matching id
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
-                    if(lots.get(i).getId().intValue() == lotChange.lotId){
+                    if (lots.get(i).getId() == lotChange.getLotId()) {
                         currentIndex = i;
                         break;
                     }
@@ -349,36 +254,20 @@ public class List_Card extends JPanel {
 
     }
 
-    /**
-     * Controller for Lot removal, which allows the system to flag a lot as
-     * "markedForRemoval"; this will remove the Lot and all associated bids
-     * (although the Lot *should* never have any associated bids). This will
-     * ensure that all connected clients are updated with the removed lot,
-     * without just removing the lot from the initial client.
-     */
     private class RemoveLotFromAuctionNotifier extends Notifier {
 
-        /**
-         * Custom notify implementation which will fetch the current lot from
-         * the space, and remove the lot from the current table and lot list.
-         * It will then remove any associated bids before removing the lot from
-         * the space entirely. However, this should never occur because you can
-         * only remove a lot when no bids have been placed on the item.
-         *
-         * @param ev        the remote event
-         */
         @Override
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = getTableModel();
 
             try {
-                // Grab the latest IWsItemRemover from the Space (there should only be one).
+                // Grab the latest U1654949_LotRemover from the Space (there should only be one).
                 U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Find the lot with the matching lot id (if there is one)
                 int currentIndex = -1;
                 for (int i = 0, j = lots.size(); i < j; i++){
-                    if (lots.get(i).getId().intValue() == remover.getId()){
+                    if (lots.get(i).getId() == remover.getId()) {
                         currentIndex = i;
                         break;
                     }
@@ -402,7 +291,7 @@ public class List_Card extends JPanel {
                     }
                 }
 
-                // If the IWsLot exists and was removed, remove it from the table
+                // If the U1654949_Lot exists and was removed, remove it from the table
                 if(remover.isRemoved() && currentIndex > -1){
                     lots.remove(currentIndex);
                     model.removeRow(currentIndex);
@@ -411,10 +300,10 @@ public class List_Card extends JPanel {
                 // Ensure that the matching lot is removed from the Space if it exists
                 space.takeIfExists(new U1654949_Lot_Space(remover.getId()), null, 1000);
 
-                // Remove all bids associated with the IWsLot
+                // Remove all bids associated with the U1654949_Lot
                 Object o;
                 do {
-                    o = space.takeIfExists(new U1654949_Bid_Space(remover.id), null, 1000);
+                    o = space.takeIfExists(new U1654949_Bid_Space(remover.getId()), null, 1000);
                 } while(o != null);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -424,3 +313,4 @@ public class List_Card extends JPanel {
     }
 
 }
+
