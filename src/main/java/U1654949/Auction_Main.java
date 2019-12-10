@@ -31,37 +31,9 @@ public class Auction_Main extends JFrame {
      */
     public Auction_Main() {
 
-        auctionSpace = Space_Utils.getSpace();
-        if (auctionSpace == null) {
-            System.err.println("Failed to find the JavaSpace");
-            System.exit(1);
-        }
-        try {
-            if (auctionSpace.read(new U1654949_Lot_Counter(), null, 1000) == null) {
-                auctionSpace.write(new U1654949_Lot_Counter(), null, Lease.FOREVER);
-            }
-            if (auctionSpace.read(new U1654949_Bid_Counter(), null, 1000) == null) {
-                auctionSpace.write(new U1654949_Bid_Counter(), null, Lease.FOREVER);
-            }
-        } catch (UnusableEntryException | TransactionException | RemoteException | InterruptedException e) {
-            System.err.println("Error: " + e);
-        }
+        Space_Setup();
 
-        setTitle(Default_Variables.APPLICATION_TITLE + " - " + User.getCurrentUser().getId());
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent evt) {
-                System.exit(0);
-            }
-        });
-        Container cp = getContentPane();
-        cp.setLayout(new BorderLayout());
-        JPanel cards = new JPanel(new CardLayout());
-        final List_Card auctionCard = new List_Card(lots, cards);
-        cards.add(auctionCard, Default_Variables.AUCTION_CARD);
-        cp.add(cards);
-        pack();
-        setResizable(false);
-        setVisible(true);
+        final List_Card auctionCard = Interface_Starter();
 
         new Thread(new Runnable() {
             @Override
@@ -83,6 +55,43 @@ public class Auction_Main extends JFrame {
                 }
             }
         }).start();
+    }
+
+    private List_Card Interface_Starter() {
+        setTitle(Default_Variables.APPLICATION_TITLE + " - " + User.getCurrentUser().getId());
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent evt) {
+                System.exit(0);
+            }
+        });
+        Container cp = getContentPane();
+        cp.setLayout(new BorderLayout());
+        JPanel cards = new JPanel(new CardLayout());
+        final List_Card auctionCard = new List_Card(lots, cards);
+        cards.add(auctionCard, Default_Variables.AUCTION_CARD);
+        cp.add(cards);
+        pack();
+        setResizable(false);
+        setVisible(true);
+        return auctionCard;
+    }
+
+    private void Space_Setup() {
+        auctionSpace = Space_Utils.getSpace();
+        if (auctionSpace == null) {
+            System.err.println("Failed to find the JavaSpace");
+            System.exit(1);
+        }
+        try {
+            if (auctionSpace.read(new U1654949_Lot_Counter(), null, 1000) == null) {
+                auctionSpace.write(new U1654949_Lot_Counter(), null, Lease.FOREVER);
+            }
+            if (auctionSpace.read(new U1654949_Bid_Counter(), null, 1000) == null) {
+                auctionSpace.write(new U1654949_Bid_Counter(), null, Lease.FOREVER);
+            }
+        } catch (UnusableEntryException | TransactionException | RemoteException | InterruptedException e) {
+            System.err.println("Error: " + e);
+        }
     }
 
     /**

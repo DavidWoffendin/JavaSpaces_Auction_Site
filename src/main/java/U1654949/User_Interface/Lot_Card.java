@@ -79,7 +79,7 @@ public class Lot_Card extends JPanel {
 
     private final AcceptButtonListener acceptButtonListener;
 
-    private final RemoveLotListener removeLotListener;
+    private final RemoveButtonListener removeButtonListener;
 
     /**
      * Initializes a new card based on the given lot, which
@@ -154,7 +154,7 @@ public class Lot_Card extends JPanel {
 
         // Setup the removal and accept bid listeners
         acceptButtonListener = new AcceptButtonListener(lot, currentPrice);
-        removeLotListener = new RemoveLotListener(lot);
+        removeButtonListener = new RemoveButtonListener(lot);
 
         // Ensure a lot has not ended (this should always be true)
         if(!lot.isEnded()) {
@@ -166,7 +166,7 @@ public class Lot_Card extends JPanel {
                 if(lot.getLastBid() == null){
                     // Set the new text and add a removal listener
                     acceptBidOrRemoveLot.setText("Remove Lot");
-                    acceptBidOrRemoveLot.addMouseListener(removeLotListener);
+                    acceptBidOrRemoveLot.addMouseListener(removeButtonListener);
                 } else {
                     // Add a listener to accept the last bid
                     acceptBidOrRemoveLot.addMouseListener(acceptButtonListener);
@@ -177,7 +177,7 @@ public class Lot_Card extends JPanel {
 
             } else {
                 // Allow the user to place a bid if desired
-                placeBid.addMouseListener(new PlaceBidListener(lot));
+                placeBid.addMouseListener(new PlaceButtonListener(lot));
                 panel.add(placeBid, BorderLayout.EAST);
             }
         }
@@ -293,7 +293,7 @@ public class Lot_Card extends JPanel {
                     // Allow the Seller to now accept the bids instead of remove them
                     acceptBidOrRemoveLot.setText("Accept Latest Bid");
                     acceptBidOrRemoveLot.addMouseListener(acceptButtonListener);
-                    acceptBidOrRemoveLot.removeMouseListener(removeLotListener);
+                    acceptBidOrRemoveLot.removeMouseListener(removeButtonListener);
                 }
 
                 // Add the bid to the top of the table

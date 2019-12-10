@@ -9,8 +9,6 @@ public final class Default_Variables {
         throw new UnsupportedOperationException();
     }
 
-    public static final String HOST_NAME = "waterloo";
-
     public static final String APPLICATION_TITLE = "Auction Application";
 
     public static final String AUCTION_CARD = "Auction";
