@@ -2,7 +2,7 @@ package com.zackehh.ui.listeners;
 
 import com.zackehh.auction.U1654949_Bid_Class;
 import com.zackehh.auction.U1654949_Lot_Class;
-import com.zackehh.auction.U1654949_Bid_Counter_Class;
+import com.zackehh.auction.U1654949_Bid_Counter;
 import com.zackehh.auction.U1654949_Lot_Updater_Class;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
@@ -98,12 +98,12 @@ public class PlaceBidListener extends MouseAdapter {
                     transaction = trc.transaction;
 
                     // Refresh the secretary and the lot form the space
-                    U1654949_Bid_Counter_Class secretary = (U1654949_Bid_Counter_Class) space.take(new U1654949_Bid_Counter_Class(), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Bid_Counter secretary = (U1654949_Bid_Counter) space.take(new U1654949_Bid_Counter(), transaction, Constants.SPACE_TIMEOUT);
                     // dispose of the previous lot item
                     U1654949_Lot_Class updatedLot = (U1654949_Lot_Class) space.take(new U1654949_Lot_Class(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
 
                     // Get the next bid id value
-                    int bidNumber = secretary.addNewItem();
+                    int bidNumber = secretary.countNewItem();
 
                     // Add the new fields to the lot
                     updatedLot.getHistory().add(bidNumber);

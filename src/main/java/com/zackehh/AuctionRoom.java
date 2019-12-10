@@ -1,8 +1,8 @@
 package com.zackehh;
 
 import com.zackehh.auction.U1654949_Lot_Class;
-import com.zackehh.auction.U1654949_Bid_Counter_Class;
-import com.zackehh.auction.U1654949_Lot_Counter_Class;
+import com.zackehh.auction.U1654949_Bid_Counter;
+import com.zackehh.auction.U1654949_Lot_Counter;
 import com.zackehh.ui.cards.AuctionCard;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
@@ -79,15 +79,15 @@ public class AuctionRoom extends JFrame {
 
         try {
             // Ensure an IWsLotSecretary lives in the Space
-            Object o = space.read(new U1654949_Lot_Counter_Class(), null, 1000);
+            Object o = space.read(new U1654949_Lot_Counter(), null, 1000);
             if(o == null){
-                space.write(new U1654949_Lot_Counter_Class(0), null, Lease.FOREVER);
+                space.write(new U1654949_Lot_Counter(0), null, Lease.FOREVER);
             }
 
             // Ensure an IWsBidSecretary lives in the Space
-            o = space.read(new U1654949_Bid_Counter_Class(), null, 1000);
+            o = space.read(new U1654949_Bid_Counter(), null, 1000);
             if(o == null){
-                space.write(new U1654949_Bid_Counter_Class(0), null, Lease.FOREVER);
+                space.write(new U1654949_Bid_Counter(0), null, Lease.FOREVER);
             }
         } catch(Exception e){
             e.printStackTrace();
@@ -134,11 +134,11 @@ public class AuctionRoom extends JFrame {
                     // Read the latest known version of the IWsSecretary from the Space
                     // It could be necessary to re-read this on each iteration on the loop,
                     // but it does not seem to be needed for an application of this scale.
-                    U1654949_Lot_Counter_Class secretary = (U1654949_Lot_Counter_Class) space.read(new U1654949_Lot_Counter_Class(), null, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Constants.SPACE_TIMEOUT);
 
                     int i = 0;
                     // Loop for all item ids
-                    while(i <= secretary.getItemNumber()) {
+                    while(i <= secretary.getItemCounter()) {
 
                         // Search for the next template in the Space
                         U1654949_Lot_Class template = new U1654949_Lot_Class(i++ + 1, null, null, null, null, null, false, false);

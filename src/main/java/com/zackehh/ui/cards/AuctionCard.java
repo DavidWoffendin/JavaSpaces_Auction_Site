@@ -2,7 +2,7 @@ package com.zackehh.ui.cards;
 
 import com.zackehh.auction.U1654949_Bid_Class;
 import com.zackehh.auction.U1654949_Lot_Class;
-import com.zackehh.auction.U1654949_Lot_Counter_Class;
+import com.zackehh.auction.U1654949_Lot_Counter;
 import com.zackehh.auction.U1654949_Lot_Remover_Class;
 import com.zackehh.auction.U1654949_Lot_Updater_Class;
 import com.zackehh.ui.GenericNotifier;
@@ -182,10 +182,10 @@ public class AuctionCard extends JPanel {
                     transaction = trc.transaction;
 
                     // Pull the latest IWsLotSecretary from the space
-                    U1654949_Lot_Counter_Class secretary = (U1654949_Lot_Counter_Class) space.take(new U1654949_Lot_Counter_Class(), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Constants.SPACE_TIMEOUT);
 
                     // Increment and retrieve the new item id
-                    final int lotNumber = secretary.addNewItem();
+                    final int lotNumber = secretary.countNewItem();
 
                     // Create a new lot based on the user input
                     U1654949_Lot_Class newLot = new U1654949_Lot_Class(lotNumber, UserUtils.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
@@ -230,7 +230,7 @@ public class AuctionCard extends JPanel {
         try {
             // Ensure that all listeners are set for notify
             space.notify(new U1654949_Lot_Updater_Class(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
-            space.notify(new U1654949_Lot_Counter_Class(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
+            space.notify(new U1654949_Lot_Counter(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
             space.notify(new U1654949_Lot_Remover_Class(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -270,8 +270,8 @@ public class AuctionCard extends JPanel {
 
             try {
                 // Grab the latest version of the IWsLotSecretary and the latest lot from the Space
-                U1654949_Lot_Counter_Class secretary = (U1654949_Lot_Counter_Class) space.read(new U1654949_Lot_Counter_Class(), null, Constants.SPACE_TIMEOUT);
-                U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(secretary.getItemNumber()), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Class latestLot = (U1654949_Lot_Class) space.read(new U1654949_Lot_Class(secretary.getItemCounter()), null, Constants.SPACE_TIMEOUT);
 
                 // Convert the lot to an Object[][]
                 Object[] insertion = latestLot.asObjectArray();
