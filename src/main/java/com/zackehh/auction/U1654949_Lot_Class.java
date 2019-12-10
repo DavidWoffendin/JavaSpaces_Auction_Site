@@ -44,7 +44,7 @@ public class U1654949_Lot_Class implements Entry {
     /**
      * The seller of this item.
      */
-    public U1654949_User_Class user;
+    public U1654949_User user;
 
     /**
      * Whether the auction for this lot has finished.
@@ -80,7 +80,7 @@ public class U1654949_Lot_Class implements Entry {
      * @param description   a short description of the item
      * @param ended         whether the lot has ended
      */
-    public U1654949_Lot_Class(Integer id, U1654949_User_Class user, ArrayList<Integer> history, String name, Double price, String description, Boolean ended, Boolean markedForRemoval){
+    public U1654949_Lot_Class(Integer id, U1654949_User user, ArrayList<Integer> history, String name, Double price, String description, Boolean ended, Boolean markedForRemoval){
         this.id = id;
         this.user = user;
         this.history = history;
@@ -105,7 +105,7 @@ public class U1654949_Lot_Class implements Entry {
      *
      * @return IWsUser      the user
      */
-    public U1654949_User_Class getUser(){
+    public U1654949_User getUser(){
         return user;
     }
 
@@ -192,7 +192,7 @@ public class U1654949_Lot_Class implements Entry {
      *
      * @param user          the IWsUser user
      */
-    public U1654949_Lot_Class setUser(U1654949_User_Class user){
+    public U1654949_Lot_Class setUser(U1654949_User user){
         this.user = user;
         return this;
     }

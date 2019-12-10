@@ -2,7 +2,7 @@ package com.zackehh.util;
 
 import com.zackehh.auction.U1654949_Bid_Class;
 import com.zackehh.auction.U1654949_Lot_Class;
-import com.zackehh.auction.U1654949_User_Class;
+import com.zackehh.auction.U1654949_User;
 import net.jini.space.JavaSpace;
 
 import javax.swing.text.JTextComponent;
@@ -104,7 +104,7 @@ public class InterfaceUtils {
 
                 // If the bid is anonymous, reset the user (locally)
                 if(bidItem.isAnonymous(refreshedLot)) {
-                    bidItem.setUser(new U1654949_User_Class("Anonymous Buyer"));
+                    bidItem.setUser(new U1654949_User("Anonymous Buyer"));
                 }
 
                 // Add the bid to the history list

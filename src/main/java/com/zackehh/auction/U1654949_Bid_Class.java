@@ -37,7 +37,7 @@ public class U1654949_Bid_Class implements Entry {
     /**
      * The user who bid on the item.
      */
-    public U1654949_User_Class user;
+    public U1654949_User user;
 
     /**
      * Default constructor, used to match anything in the space.
@@ -61,7 +61,7 @@ public class U1654949_Bid_Class implements Entry {
      * @param price         the price the user has bid on the item
      * @param visible       whether this bid is anonymous or not
      */
-    public U1654949_Bid_Class(Integer id, U1654949_User_Class user, Integer itemId, Double price, Boolean visible){
+    public U1654949_Bid_Class(Integer id, U1654949_User user, Integer itemId, Double price, Boolean visible){
         this.id = id;
         this.user = user;
         this.itemId = itemId;
@@ -83,7 +83,7 @@ public class U1654949_Bid_Class implements Entry {
      *
      * @return String       the user id
      */
-    public U1654949_User_Class getUser() {
+    public U1654949_User getUser() {
         return user;
     }
 
@@ -142,7 +142,7 @@ public class U1654949_Bid_Class implements Entry {
      *
      * @param user      the IWsUser user
      */
-    public U1654949_Bid_Class setUser(U1654949_User_Class user){
+    public U1654949_Bid_Class setUser(U1654949_User user){
         this.user = user;
         return this;
     }
