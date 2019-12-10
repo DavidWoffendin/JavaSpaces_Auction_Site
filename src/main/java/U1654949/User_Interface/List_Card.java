@@ -1,17 +1,17 @@
-package com.zackehh.ui.cards;
+package U1654949.User_Interface;
 
-import com.zackehh.auction.U1654949_Bid_Space;
-import com.zackehh.auction.U1654949_Lot_Space;
-import com.zackehh.auction.U1654949_Lot_Counter;
-import com.zackehh.auction.U1654949_Lot_Remover;
-import com.zackehh.auction.U1654949_Lot_Updater;
-import com.zackehh.ui.GenericNotifier;
-import com.zackehh.ui.components.BaseTable;
-import com.zackehh.ui.components.JResultText;
-import com.zackehh.util.Constants;
-import com.zackehh.util.InterfaceUtils;
-import com.zackehh.util.SpaceUtils;
-import com.zackehh.util.UserUtils;
+import U1654949.Space_Auction_Items.U1654949_Lot_Counter;
+import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
+import U1654949.Space_Auction_Items.U1654949_Lot_Updater;
+import U1654949.User_Interface.Defaults.Default_Table;
+import U1654949.User_Interface.Defaults.Default_Text;
+import U1654949.Default_Variables;
+import U1654949.User_Interface.Interface_Helpers.Common_Functions;
+import U1654949.Space_Utils;
+import U1654949.User;
+import U1654949.Space_Auction_Items.U1654949_Bid_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.User_Interface.Interface_Helpers.GenericNotifier;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * specifically based on the chosen lot to allow bids etc.
  * This card also provides a way for a user to add a new lot.
  */
-public class AuctionCard extends JPanel {
+public class List_Card extends JPanel {
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -56,7 +56,7 @@ public class AuctionCard extends JPanel {
     /**
      * The table to keep track of any new lots entered.
      */
-    private final BaseTable lotTable;
+    private final Default_Table lotTable;
 
     /**
      * Initialize a new AuctionCard with a list of initial lots
@@ -67,13 +67,13 @@ public class AuctionCard extends JPanel {
      * @param lots              the list of lot items
      * @param cards             the cards layout
      */
-    public AuctionCard(final ArrayList<U1654949_Lot_Space> lots, final JPanel cards){
+    public List_Card(final ArrayList<U1654949_Lot_Space> lots, final JPanel cards){
         super(new BorderLayout());
 
         // Setup required parameters
         this.lots = lots;
-        this.manager = SpaceUtils.getManager();
-        this.space = SpaceUtils.getSpace();
+        this.manager = Space_Utils.getManager();
+        this.space = Space_Utils.getSpace();
 
         // Setup the main Grid layout to contain the input form
         JPanel fieldInputPanel = new JPanel(new GridLayout(4, 2));
@@ -95,7 +95,7 @@ public class AuctionCard extends JPanel {
         fieldInputPanel.add(startingPriceIn);
 
         // Setup result output fields
-        final JResultText resultTextOut = new JResultText();
+        final Default_Text resultTextOut = new Default_Text();
         fieldInputPanel.add(new JLabel("Result: "));
         fieldInputPanel.add(resultTextOut);
 
@@ -103,7 +103,7 @@ public class AuctionCard extends JPanel {
         add(fieldInputPanel, BorderLayout.NORTH);
 
         // Create an initial base table with the given column names
-        lotTable = new BaseTable(new String[0][5], new String[] {
+        lotTable = new Default_Table(new String[0][5], new String[] {
                 "Lot ID", "Item Name", "Seller ID", "Current Price", "Status"
         });
 
@@ -129,10 +129,10 @@ public class AuctionCard extends JPanel {
                     }
 
                     // Add a new card, using the selected lot
-                    cards.add(new LotCard(cards, lots.get(row)), Constants.BID_CARD);
+                    cards.add(new Lot_Card(cards, lots.get(row)), Default_Variables.BID_CARD);
 
                     // Display the new card
-                    ((CardLayout) cards.getLayout()).show(cards, Constants.BID_CARD);
+                    ((CardLayout) cards.getLayout()).show(cards, Default_Variables.BID_CARD);
                 }
             }
         });
@@ -160,7 +160,7 @@ public class AuctionCard extends JPanel {
                 // Gather user inputs
                 String itemName = itemNameIn.getText();
                 String itemDescription = itemDescriptionIn.getText();
-                Number startingPrice = InterfaceUtils.getTextAsNumber(startingPriceIn);
+                Number startingPrice = Common_Functions.getTextAsNumber(startingPriceIn);
                 Double potentialDouble = startingPrice == null ? 0 : startingPrice.doubleValue();
 
                 // Validate item details, short circuit if not met
@@ -182,16 +182,16 @@ public class AuctionCard extends JPanel {
                     transaction = trc.transaction;
 
                     // Pull the latest IWsLotSecretary from the space
-                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Default_Variables.SPACE_TIMEOUT);
 
                     // Increment and retrieve the new item id
                     final int lotNumber = secretary.countNewItem();
 
                     // Create a new lot based on the user input
-                    U1654949_Lot_Space newLot = new U1654949_Lot_Space(lotNumber, UserUtils.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
+                    U1654949_Lot_Space newLot = new U1654949_Lot_Space(lotNumber, User.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
 
                     // Write both the secretary and the lot to the space
-                    space.write(newLot, transaction, Constants.LOT_LEASE_TIMEOUT);
+                    space.write(newLot, transaction, Default_Variables.LOT_LEASE_TIMEOUT);
                     space.write(secretary, transaction, Lease.FOREVER);
 
                     // Commit the Transaction
@@ -270,8 +270,8 @@ public class AuctionCard extends JPanel {
 
             try {
                 // Grab the latest version of the IWsLotSecretary and the latest lot from the Space
-                U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Constants.SPACE_TIMEOUT);
-                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(secretary.getItemCounter()), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
+                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(secretary.getItemCounter()), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Convert the lot to an Object[][]
                 Object[] insertion = latestLot.asObjectArray();
@@ -318,7 +318,7 @@ public class AuctionCard extends JPanel {
 
             try {
                 // Read the latest IWsLotChange object from the Space (there should only be one)
-                U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) space.read(new U1654949_Lot_Updater(), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) space.read(new U1654949_Lot_Updater(), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Find the existing index of the lot with a matching id
                 int currentIndex = -1;
@@ -377,7 +377,7 @@ public class AuctionCard extends JPanel {
 
             try {
                 // Grab the latest IWsItemRemover from the Space (there should only be one).
-                U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Find the lot with the matching lot id (if there is one)
                 int currentIndex = -1;
@@ -401,7 +401,7 @@ public class AuctionCard extends JPanel {
                     model.setValueAt("Ended", currentIndex, 4);
 
                     // Display a dialog if the current user won the ended item
-                    if(UserUtils.getCurrentUser().equals(lot.getUser())){
+                    if(User.getCurrentUser().equals(lot.getUser())){
                         JOptionPane.showMessageDialog(null, "You just won " + lot.getName() + "!");
                     }
                 }

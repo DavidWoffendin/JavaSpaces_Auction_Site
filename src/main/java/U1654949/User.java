@@ -1,6 +1,6 @@
-package com.zackehh.util;
+package U1654949;
 
-import com.zackehh.auction.U1654949_User;
+import U1654949.Space_Auction_Items.U1654949_User;
 
 /**
  * An extremely simple class to store and keep track of the
@@ -8,7 +8,7 @@ import com.zackehh.auction.U1654949_User;
  * a getter and setter for `username`, and everything should
  * be accessed statically.
  */
-public final class UserUtils {
+public final class User {
 
     /**
      * The currently registered user in the client. This should
@@ -21,7 +21,7 @@ public final class UserUtils {
      * Default constructor which should not be called. All variables
      * and properties should be accessed statically.
      */
-    private UserUtils(){
+    private User(){
         throw new UnsupportedOperationException();
     }
 

@@ -1,17 +1,17 @@
-package com.zackehh.ui.cards;
+package U1654949.User_Interface;
 
-import com.zackehh.auction.U1654949_Bid_Space;
-import com.zackehh.auction.U1654949_Lot_Space;
-import com.zackehh.auction.U1654949_Lot_Remover;
-import com.zackehh.ui.GenericNotifier;
-import com.zackehh.ui.components.BaseTable;
-import com.zackehh.ui.listeners.AcceptBidListener;
-import com.zackehh.ui.listeners.PlaceBidListener;
-import com.zackehh.ui.listeners.RemoveLotListener;
-import com.zackehh.util.Constants;
-import com.zackehh.util.InterfaceUtils;
-import com.zackehh.util.SpaceUtils;
-import com.zackehh.util.UserUtils;
+import U1654949.Space_Auction_Items.U1654949_Bid_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
+import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.User_Interface.Interface_Helpers.GenericNotifier;
+import U1654949.User_Interface.Defaults.Default_Table;
+import U1654949.User_Interface.Interface_Helpers.PlaceBidListener;
+import U1654949.Default_Variables;
+import U1654949.User_Interface.Interface_Helpers.Common_Functions;
+import U1654949.Space_Utils;
+import U1654949.User;
+import U1654949.User_Interface.Interface_Helpers.AcceptBidListener;
+import U1654949.User_Interface.Interface_Helpers.RemoveLotListener;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
@@ -29,7 +29,7 @@ import java.util.Vector;
  * a bid on an item, as well as allowing the seller to
  * accept a bid or remove the current item from the auction.
  */
-public class LotCard extends JPanel {
+public class Lot_Card extends JPanel {
 
     /**
      * The common JavaSpace instance, stored privately.
@@ -40,7 +40,7 @@ public class LotCard extends JPanel {
      * The table of bids which will hold the the bid
      * history of the current lot.
      */
-    private final BaseTable bidTable;
+    private final Default_Table bidTable;
 
     /**
      * The lot that this card is associated with. This
@@ -96,18 +96,18 @@ public class LotCard extends JPanel {
      * @param cards             the parent card layout
      * @param lotForCard        the lot this card is for
      */
-    public LotCard(final JPanel cards, U1654949_Lot_Space lotForCard) {
+    public Lot_Card(final JPanel cards, U1654949_Lot_Space lotForCard) {
         super();
 
         // Set required fields from params
         this.cards = cards;
-        this.space = SpaceUtils.getSpace();
+        this.space = Space_Utils.getSpace();
 
         // Refresh the lot, in case state has changed
         U1654949_Lot_Space baseLot = lotForCard;
         try {
             U1654949_Lot_Space templateLot = new U1654949_Lot_Space(lotForCard.getId());
-            baseLot = (U1654949_Lot_Space) space.read(templateLot, null, Constants.SPACE_TIMEOUT);
+            baseLot = (U1654949_Lot_Space) space.read(templateLot, null, Default_Variables.SPACE_TIMEOUT);
         } catch(Exception e){
             e.printStackTrace(); // doesn't matter, UI will handle it
         }
@@ -144,7 +144,7 @@ public class LotCard extends JPanel {
             @Override
             public void mouseClicked(MouseEvent event) {
                 // Remove the current card
-                cards.remove(LotCard.this);
+                cards.remove(Lot_Card.this);
             }
         });
 
@@ -164,7 +164,7 @@ public class LotCard extends JPanel {
         if(!lot.isEnded()) {
 
             // If the user is the Seller of the lot
-            if (UserUtils.getCurrentUser().equals(lot.getUser())) {
+            if (User.getCurrentUser().equals(lot.getUser())) {
 
                 // If there are no bids, the Seller can remove the lot
                 if(lot.getLastBid() == null){
@@ -214,7 +214,7 @@ public class LotCard extends JPanel {
 
                 // Find the corresponding method for the label
                 Class<?> c = lot.getClass();
-                Method method = c.getMethod(InterfaceUtils.toCamelCase("get " + label, " "));
+                Method method = c.getMethod(Common_Functions.toCamelCase("get " + label, " "));
 
                 // Get the string value of the returned value
                 String valueOfField = method.invoke(lot) + "";
@@ -229,17 +229,17 @@ public class LotCard extends JPanel {
         }
 
         // Grab the history of IWsBid from the Space
-        bidHistory = InterfaceUtils.getVectorBidMatrix(lot);
+        bidHistory = Common_Functions.getVectorBidMatrix(lot);
 
         // Behaviour changes based on active lots
         if(lot.isEnded()){
             // Display the winner and the price the item was won for
             currentPriceLabel = new JLabel("Won by " + bidHistory.get(0).get(0) + " -", SwingConstants.RIGHT);
-            currentPrice.setText(" Price: " + InterfaceUtils.getDoubleAsCurrency(lot.getPrice()));
+            currentPrice.setText(" Price: " + Common_Functions.getDoubleAsCurrency(lot.getPrice()));
         } else {
             // Display the current price of the item
             currentPriceLabel = new JLabel("Current Price: ", SwingConstants.RIGHT);
-            currentPrice.setText(InterfaceUtils.getDoubleAsCurrency(lot.getPrice()));
+            currentPrice.setText(Common_Functions.getDoubleAsCurrency(lot.getPrice()));
         }
 
         // Add the Current Price labels to the panel
@@ -251,7 +251,7 @@ public class LotCard extends JPanel {
         add(p);
 
         // Create a new BaseTable with two columns
-        bidTable = new BaseTable(bidHistory, new Vector<String>(){{
+        bidTable = new Default_Table(bidHistory, new Vector<String>(){{
             add("Buyer ID");
             add("Bid Amount");
         }});
@@ -283,17 +283,17 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 // Grab the latest version of the current lot and the latest bid from the Space
-                final U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, Constants.SPACE_TIMEOUT);
-                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) space.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, Default_Variables.SPACE_TIMEOUT);
+                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) space.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, Default_Variables.SPACE_TIMEOUT);
 
                 // Format the lot for the BaseTable
                 Vector<String> insertion = new Vector<String>(){{
                     add(latestBid.getUser().getId());
-                    add(InterfaceUtils.getDoubleAsCurrency(latestBid.getPrice()));
+                    add(Common_Functions.getDoubleAsCurrency(latestBid.getPrice()));
                 }};
 
                 // If there is a latest bid
-                if(latestLot.getLastBid() != null && UserUtils.getCurrentUser().equals(lot.getUser())){
+                if(latestLot.getLastBid() != null && User.getCurrentUser().equals(lot.getUser())){
                     // Allow the Seller to now accept the bids instead of remove them
                     acceptBidOrRemoveLot.setText("Accept Latest Bid");
                     acceptBidOrRemoveLot.addMouseListener(acceptBidListener);
@@ -307,7 +307,7 @@ public class LotCard extends JPanel {
                 bidTable.revalidate();
 
                 // Set the new price to the Current Price label
-                currentPrice.setText(InterfaceUtils.getDoubleAsCurrency(latestLot.getPrice()));
+                currentPrice.setText(Common_Functions.getDoubleAsCurrency(latestLot.getPrice()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -336,7 +336,7 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 // Read the latest IWsItemRemover from the Space (there should only be the one we want)
-                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(lot.getId()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(lot.getId()), null, Default_Variables.SPACE_TIMEOUT);
 
                 // If it was removed due to being won
                 if(remover.isEnded()){
@@ -364,7 +364,7 @@ public class LotCard extends JPanel {
                     // Prompt that the lot was removed
                     JOptionPane.showMessageDialog(null, "This lot has been removed!");
                     // Return to the main UI
-                    cards.remove(LotCard.this);
+                    cards.remove(Lot_Card.this);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

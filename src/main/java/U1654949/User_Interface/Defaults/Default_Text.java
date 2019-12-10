@@ -1,4 +1,4 @@
-package com.zackehh.ui.components;
+package U1654949.User_Interface.Defaults;
 
 import javax.swing.*;
 
@@ -6,7 +6,7 @@ import javax.swing.*;
  * An extremely simple override of JLabel#setText to ensure
  * that labels align with JTextFields positioned above them.
  */
-public class JResultText extends JLabel {
+public class Default_Text extends JLabel {
 
     /**
      * Simple modification of JLabel#setText to ensure

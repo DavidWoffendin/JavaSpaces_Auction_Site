@@ -1,12 +1,12 @@
-package com.zackehh.ui.listeners;
+package U1654949.User_Interface.Interface_Helpers;
 
-import com.zackehh.auction.U1654949_Bid_Space;
-import com.zackehh.auction.U1654949_Lot_Space;
-import com.zackehh.auction.U1654949_Bid_Counter;
-import com.zackehh.auction.U1654949_Lot_Updater;
-import com.zackehh.util.Constants;
-import com.zackehh.util.SpaceUtils;
-import com.zackehh.util.UserUtils;
+import U1654949.Space_Auction_Items.U1654949_Bid_Counter;
+import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot_Updater;
+import U1654949.Default_Variables;
+import U1654949.Space_Utils;
+import U1654949.User;
+import U1654949.Space_Auction_Items.U1654949_Bid_Space;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionFactory;
@@ -51,8 +51,8 @@ public class PlaceBidListener extends MouseAdapter {
      */
     public PlaceBidListener(U1654949_Lot_Space lot){
         this.lot = lot;
-        this.manager = SpaceUtils.getManager();
-        this.space = SpaceUtils.getSpace();
+        this.manager = Space_Utils.getManager();
+        this.space = Space_Utils.getSpace();
     }
 
     /**
@@ -88,7 +88,7 @@ public class PlaceBidListener extends MouseAdapter {
             String bidString = bidEntry.getText();
 
             // If entered amount if a valid currency value and is higher than the last known bid
-            if(bidString.matches(Constants.CURRENCY_REGEX) && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()){
+            if(bidString.matches(Default_Variables.CURRENCY_REGEX) && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()){
                 Transaction transaction = null;
                 try {
                     // Create a new Transaction
@@ -96,9 +96,9 @@ public class PlaceBidListener extends MouseAdapter {
                     transaction = trc.transaction;
 
                     // Refresh the secretary and the lot form the space
-                    U1654949_Bid_Counter secretary = (U1654949_Bid_Counter) space.take(new U1654949_Bid_Counter(), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Bid_Counter secretary = (U1654949_Bid_Counter) space.take(new U1654949_Bid_Counter(), transaction, Default_Variables.SPACE_TIMEOUT);
                     // dispose of the previous lot item
-                    U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.take(new U1654949_Lot_Space(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.take(new U1654949_Lot_Space(lot.getId()), transaction, Default_Variables.SPACE_TIMEOUT);
 
                     // Get the next bid id value
                     int bidNumber = secretary.countNewItem();
@@ -108,12 +108,12 @@ public class PlaceBidListener extends MouseAdapter {
                     updatedLot.setPrice(bid);
 
                     // Create a new bid with the new values
-                    final U1654949_Bid_Space newBid = new U1654949_Bid_Space(bidNumber, UserUtils.getCurrentUser(), lot.getId(), bid);
+                    final U1654949_Bid_Space newBid = new U1654949_Bid_Space(bidNumber, User.getCurrentUser(), lot.getId(), bid);
 
                     // Write all values back to the space
-                    space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, Constants.TEMP_OBJECT);
-                    space.write(updatedLot, transaction, Constants.LOT_LEASE_TIMEOUT);
-                    space.write(newBid, transaction, Constants.BID_LEASE_TIMEOUT);
+                    space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, Default_Variables.TEMP_OBJECT);
+                    space.write(updatedLot, transaction, Default_Variables.LOT_LEASE_TIMEOUT);
+                    space.write(newBid, transaction, Default_Variables.BID_LEASE_TIMEOUT);
                     space.write(secretary, transaction, Lease.FOREVER);
 
                     // Commit transaction

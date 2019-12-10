@@ -1,12 +1,9 @@
-package com.zackehh;
+package U1654949;
 
-import com.zackehh.auction.U1654949_Lot_Space;
-import com.zackehh.auction.U1654949_Bid_Counter;
-import com.zackehh.auction.U1654949_Lot_Counter;
-import com.zackehh.ui.cards.AuctionCard;
-import com.zackehh.util.Constants;
-import com.zackehh.util.SpaceUtils;
-import com.zackehh.util.UserUtils;
+import U1654949.Space_Auction_Items.U1654949_Bid_Counter;
+import U1654949.Space_Auction_Items.U1654949_Lot_Counter;
+import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.User_Interface.List_Card;
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
 
@@ -24,7 +21,7 @@ import java.util.ArrayList;
  * the initial objects into the main AuctionCard view, via a
  * background thread.
  */
-public class AuctionRoom extends JFrame {
+public class Auction_Main extends JFrame {
 
     /**
      * A list of lot items which are being tracked in the space.
@@ -54,9 +51,9 @@ public class AuctionRoom extends JFrame {
             System.exit(1);
         }
 
-        UserUtils.setCurrentUser(userId);
+        User.setCurrentUser(userId);
 
-        new AuctionRoom();
+        new Auction_Main();
     }
 
     /**
@@ -68,10 +65,10 @@ public class AuctionRoom extends JFrame {
      * pushed to the list of lots displayed inside the
      * AuctionCard.
      */
-    public AuctionRoom() {
+    public Auction_Main() {
 
         // Initialise a local Space, exit on failure
-        space = SpaceUtils.getSpace();
+        space = Space_Utils.getSpace();
         if (space == null){
             System.err.println("Failed to find the JavaSpace");
             System.exit(1);
@@ -95,7 +92,7 @@ public class AuctionRoom extends JFrame {
         }
 
         // Set the application title as well as the username
-        setTitle(Constants.APPLICATION_TITLE + " - " + UserUtils.getCurrentUser().getId());
+        setTitle(Default_Variables.APPLICATION_TITLE + " - " + User.getCurrentUser().getId());
 
         // Exit on the exit button press
         addWindowListener(new WindowAdapter() {
@@ -112,10 +109,10 @@ public class AuctionRoom extends JFrame {
         JPanel cards = new JPanel(new CardLayout());
 
         // Create a new AuctionCard
-        final AuctionCard auctionCard = new AuctionCard(lots, cards);
+        final List_Card listCard = new List_Card(lots, cards);
 
         // Add the card to the CardLayout
-        cards.add(auctionCard, Constants.AUCTION_CARD);
+        cards.add(listCard, Default_Variables.AUCTION_CARD);
 
         // Add the CardLayout to the Container
         cp.add(cards);
@@ -129,12 +126,12 @@ public class AuctionRoom extends JFrame {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                DefaultTableModel model = auctionCard.getTableModel();
+                DefaultTableModel model = listCard.getTableModel();
                 try {
                     // Read the latest known version of the IWsSecretary from the Space
                     // It could be necessary to re-read this on each iteration on the loop,
                     // but it does not seem to be needed for an application of this scale.
-                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Constants.SPACE_TIMEOUT);
+                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
 
                     int i = 0;
                     // Loop for all item ids

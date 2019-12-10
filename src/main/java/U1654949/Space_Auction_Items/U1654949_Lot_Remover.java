@@ -1,4 +1,4 @@
-package com.zackehh.auction;
+package U1654949.Space_Auction_Items;
 
 import net.jini.core.entry.Entry;
 

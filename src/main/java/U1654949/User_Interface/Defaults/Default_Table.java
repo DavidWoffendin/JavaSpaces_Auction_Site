@@ -1,4 +1,4 @@
-package com.zackehh.ui.components;
+package U1654949.User_Interface.Defaults;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -11,7 +11,7 @@ import java.util.Vector;
  * a given lot. This allows a specific styling of table which
  * can be inherited to stay constant throughout the application.
  */
-public class BaseTable extends JTable {
+public class Default_Table extends JTable {
 
     /**
      * Initializes a new table using Vectors.
@@ -19,7 +19,7 @@ public class BaseTable extends JTable {
      * @param data          the data Vector
      * @param columns       the columns Vector
      */
-    public BaseTable(Vector<Vector<String>> data, Vector<String> columns){
+    public Default_Table(Vector<Vector<String>> data, Vector<String> columns){
         setModel(new UneditableTableModel(data, columns));
         init();
     }
@@ -30,7 +30,7 @@ public class BaseTable extends JTable {
      * @param data          the data Array
      * @param columns       the columns Array
      */
-    public BaseTable(Object[][] data, Object[] columns){
+    public Default_Table(Object[][] data, Object[] columns){
         setModel(new UneditableTableModel(data, columns));
         init();
     }

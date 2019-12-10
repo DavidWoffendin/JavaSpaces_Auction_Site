@@ -1,4 +1,4 @@
-package com.zackehh.util;
+package U1654949;
 
 import net.jini.space.JavaSpace;
 import net.jini.core.transaction.server.TransactionManager;
@@ -15,7 +15,7 @@ import java.io.IOException;
  *
  *  This Class has a small amount of code cleanup and has my preferred was of handling errors implemented.
  */
-public class SpaceUtils {
+public class Space_Utils {
 
     /**
      * @return Returns the JavaSpace object

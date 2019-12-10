@@ -1,8 +1,9 @@
-package com.zackehh.util;
+package U1654949.User_Interface.Interface_Helpers;
 
-import com.zackehh.auction.U1654949_Bid_Space;
-import com.zackehh.auction.U1654949_Lot_Space;
-import com.zackehh.auction.U1654949_User;
+import U1654949.Default_Variables;
+import U1654949.Space_Utils;
+import U1654949.Space_Auction_Items.U1654949_Bid_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot_Space;
 import net.jini.space.JavaSpace;
 
 import javax.swing.text.JTextComponent;
@@ -14,13 +15,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
-public class InterfaceUtils {
+public class Common_Functions {
 
     /**
      * Default constructor which should not be called. All method calls
      * should be called from a static context.
      */
-    private InterfaceUtils(){
+    private Common_Functions(){
         throw new UnsupportedOperationException();
     }
 
@@ -79,14 +80,14 @@ public class InterfaceUtils {
      * @return ArrayList    the list of bids associated
      */
     public static ArrayList<U1654949_Bid_Space> getBidHistory(U1654949_Lot_Space lot) {
-        JavaSpace space = SpaceUtils.getSpace();
+        JavaSpace space = Space_Utils.getSpace();
 
         // Initialise a list to store history
         ArrayList<U1654949_Bid_Space> bidHistory = new ArrayList<U1654949_Bid_Space>();
 
         try {
             // Fetch the latest version of the lot
-            U1654949_Lot_Space refreshedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, Constants.SPACE_TIMEOUT);
+            U1654949_Lot_Space refreshedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, Default_Variables.SPACE_TIMEOUT);
 
             // Get the history from the lot
             ArrayList<Integer> bids = refreshedLot.getBids();
@@ -100,7 +101,7 @@ public class InterfaceUtils {
             for(Integer bidId : bids){
                 // Lookup the bid with the given id
                 U1654949_Bid_Space template = new U1654949_Bid_Space(bidId, null, lot.getId(), null);
-                U1654949_Bid_Space bidItem = ((U1654949_Bid_Space) space.read(template, null, Constants.SPACE_TIMEOUT));
+                U1654949_Bid_Space bidItem = ((U1654949_Bid_Space) space.read(template, null, Default_Variables.SPACE_TIMEOUT));
 
                 // Add the bid to the history list
                 bidHistory.add(bidItem);
@@ -142,7 +143,7 @@ public class InterfaceUtils {
             // Add each bid as a vector
             values.add(iY, new Vector<String>(){{
                 add(bid.getUser().getId());
-                add(InterfaceUtils.getDoubleAsCurrency(bid.getPrice()));
+                add(Common_Functions.getDoubleAsCurrency(bid.getPrice()));
             }});
         }
 

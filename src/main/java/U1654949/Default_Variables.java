@@ -1,17 +1,17 @@
-package com.zackehh.util;
+package U1654949;
 
 /**
  * Various Constants used throughout the application. Used
  * just to keep things in sync, and removing the need to modify
  * values across a bunch of classes; rather just change it here.
  */
-public final class Constants {
+public final class Default_Variables {
 
     /**
      * Default constructor which should not be called. All variables
      * are static and final.
      */
-    private Constants(){
+    private Default_Variables(){
         throw new UnsupportedOperationException();
     }
 

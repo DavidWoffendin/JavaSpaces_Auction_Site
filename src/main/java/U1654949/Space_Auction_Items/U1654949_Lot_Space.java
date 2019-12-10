@@ -1,6 +1,6 @@
-package com.zackehh.auction;
+package U1654949.Space_Auction_Items;
 
-import com.zackehh.util.InterfaceUtils;
+import U1654949.User_Interface.Interface_Helpers.Common_Functions;
 import net.jini.core.entry.Entry;
 
 import java.util.ArrayList;
@@ -153,7 +153,7 @@ public class U1654949_Lot_Space implements Entry {
                 id,
                 name,
                 user == null ? null : user.getId(),
-                InterfaceUtils.getDoubleAsCurrency(price),
+                Common_Functions.getDoubleAsCurrency(price),
                 isEnded() ? "Ended" : "Running"
         };
     }

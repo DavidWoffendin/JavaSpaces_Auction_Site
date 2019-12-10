@@ -1,9 +1,9 @@
-package com.zackehh.ui.listeners;
+package U1654949.User_Interface.Interface_Helpers;
 
-import com.zackehh.auction.U1654949_Lot_Space;
-import com.zackehh.auction.U1654949_Lot_Remover;
-import com.zackehh.util.Constants;
-import com.zackehh.util.SpaceUtils;
+import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
+import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Default_Variables;
+import U1654949.Space_Utils;
 import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionFactory;
 import net.jini.core.transaction.server.TransactionManager;
@@ -56,8 +56,8 @@ public class AcceptBidListener extends MouseAdapter {
     public AcceptBidListener(U1654949_Lot_Space lot, JLabel currentPrice){
         this.currentPrice = currentPrice;
         this.lot = lot;
-        this.manager = SpaceUtils.getManager();
-        this.space = SpaceUtils.getSpace();
+        this.manager = Space_Utils.getManager();
+        this.space = Space_Utils.getSpace();
     }
 
     /**
@@ -92,13 +92,13 @@ public class AcceptBidListener extends MouseAdapter {
                 transaction = trc.transaction;
 
                 // Refresh the current lot from the Space
-                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), transaction, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), transaction, Default_Variables.SPACE_TIMEOUT);
 
                 // Mark the lot as ended, locally
                 updatedLot.setEnded(true);
 
                 // Write a new IWsItemRemover recording the changes
-                space.write(new U1654949_Lot_Remover(lot.getId(), true, false), transaction, Constants.TEMP_OBJECT);
+                space.write(new U1654949_Lot_Remover(lot.getId(), true, false), transaction, Default_Variables.TEMP_OBJECT);
 
                 // Commit the Transaction
                 transaction.commit();
