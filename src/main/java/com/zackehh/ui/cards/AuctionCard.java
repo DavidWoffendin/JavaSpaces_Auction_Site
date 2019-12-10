@@ -3,8 +3,8 @@ package com.zackehh.ui.cards;
 import com.zackehh.auction.U1654949_Bid_Class;
 import com.zackehh.auction.U1654949_Lot_Class;
 import com.zackehh.auction.U1654949_Lot_Counter;
-import com.zackehh.auction.U1654949_Lot_Remover_Class;
-import com.zackehh.auction.U1654949_Lot_Updater_Class;
+import com.zackehh.auction.U1654949_Lot_Remover;
+import com.zackehh.auction.U1654949_Lot_Updater;
 import com.zackehh.ui.GenericNotifier;
 import com.zackehh.ui.components.BaseTable;
 import com.zackehh.ui.components.JResultText;
@@ -229,9 +229,9 @@ public class AuctionCard extends JPanel {
 
         try {
             // Ensure that all listeners are set for notify
-            space.notify(new U1654949_Lot_Updater_Class(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
+            space.notify(new U1654949_Lot_Updater(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
             space.notify(new U1654949_Lot_Counter(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
-            space.notify(new U1654949_Lot_Remover_Class(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
+            space.notify(new U1654949_Lot_Remover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -318,12 +318,12 @@ public class AuctionCard extends JPanel {
 
             try {
                 // Read the latest IWsLotChange object from the Space (there should only be one)
-                U1654949_Lot_Updater_Class lotChange = (U1654949_Lot_Updater_Class) space.read(new U1654949_Lot_Updater_Class(), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) space.read(new U1654949_Lot_Updater(), null, Constants.SPACE_TIMEOUT);
 
                 // Find the existing index of the lot with a matching id
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
-                    if(lots.get(i).getId().intValue() == lotChange.id){
+                    if(lots.get(i).getId().intValue() == lotChange.lotId){
                         currentIndex = i;
                         break;
                     }
@@ -338,7 +338,7 @@ public class AuctionCard extends JPanel {
                 U1654949_Lot_Class lot = lots.get(currentIndex);
 
                 // Apply the new price to the lot
-                lot.setPrice(lotChange.getPrice());
+                lot.setPrice(lotChange.getLotPrice());
 
                 // Convert to an Object[][]
                 Object[] insertion = lot.asObjectArray();
@@ -377,7 +377,7 @@ public class AuctionCard extends JPanel {
 
             try {
                 // Grab the latest IWsItemRemover from the Space (there should only be one).
-                U1654949_Lot_Remover_Class remover = (U1654949_Lot_Remover_Class) space.read(new U1654949_Lot_Remover_Class(), null, Constants.SPACE_TIMEOUT);
+                U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(), null, Constants.SPACE_TIMEOUT);
 
                 // Find the lot with the matching lot id (if there is one)
                 int currentIndex = -1;
@@ -389,7 +389,7 @@ public class AuctionCard extends JPanel {
                 }
 
                 // If the lot has ended
-                if(remover.hasEnded()){
+                if(remover.isEnded()){
                     // Grab the lot at the current index
                     U1654949_Lot_Class lot = lots.get(currentIndex);
 
@@ -407,7 +407,7 @@ public class AuctionCard extends JPanel {
                 }
 
                 // If the IWsLot exists and was removed, remove it from the table
-                if(remover.hasBeenRemoved() && currentIndex > -1){
+                if(remover.isRemoved() && currentIndex > -1){
                     lots.remove(currentIndex);
                     model.removeRow(currentIndex);
                 }

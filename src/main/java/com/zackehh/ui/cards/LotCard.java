@@ -2,7 +2,7 @@ package com.zackehh.ui.cards;
 
 import com.zackehh.auction.U1654949_Bid_Class;
 import com.zackehh.auction.U1654949_Lot_Class;
-import com.zackehh.auction.U1654949_Lot_Remover_Class;
+import com.zackehh.auction.U1654949_Lot_Remover;
 import com.zackehh.ui.GenericNotifier;
 import com.zackehh.ui.components.BaseTable;
 import com.zackehh.ui.listeners.AcceptBidListener;
@@ -125,7 +125,7 @@ public class LotCard extends JPanel {
 
             // Generate the templates
             U1654949_Bid_Class bidTemplate = new U1654949_Bid_Class(null, null, lot.getId(), null, null);
-            U1654949_Lot_Remover_Class removerTemplate = new U1654949_Lot_Remover_Class(lot.getId(), null, null);
+            U1654949_Lot_Remover removerTemplate = new U1654949_Lot_Remover(lot.getId(), null, null);
 
             // Ensures all listeners are set to notify
             space.notify(bidTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
@@ -336,10 +336,10 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 // Read the latest IWsItemRemover from the Space (there should only be the one we want)
-                final U1654949_Lot_Remover_Class remover = (U1654949_Lot_Remover_Class) space.read(new U1654949_Lot_Remover_Class(lot.getId()), null, Constants.SPACE_TIMEOUT);
+                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(lot.getId()), null, Constants.SPACE_TIMEOUT);
 
                 // If it was removed due to being won
-                if(remover.hasEnded()){
+                if(remover.isEnded()){
                     // Grab the winning bid from the table
                     Vector<String> winningBid = bidHistory.get(0);
 
@@ -360,7 +360,7 @@ public class LotCard extends JPanel {
                 }
 
                 // If the Seller removed the item
-                if(remover.hasBeenRemoved()){
+                if(remover.isRemoved()){
                     // Prompt that the lot was removed
                     JOptionPane.showMessageDialog(null, "This lot has been removed!");
                     // Return to the main UI

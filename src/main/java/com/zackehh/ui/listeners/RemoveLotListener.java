@@ -1,7 +1,7 @@
 package com.zackehh.ui.listeners;
 
 import com.zackehh.auction.U1654949_Lot_Class;
-import com.zackehh.auction.U1654949_Lot_Remover_Class;
+import com.zackehh.auction.U1654949_Lot_Remover;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
 import net.jini.core.transaction.Transaction;
@@ -76,7 +76,7 @@ public class RemoveLotListener extends MouseAdapter {
             updatedLot.setMarkedForRemoval(true);
 
             // Add a new IWsItemRemover recording the changes
-            space.write(new U1654949_Lot_Remover_Class(lot.getId(), false, true), transaction, Constants.TEMP_OBJECT);
+            space.write(new U1654949_Lot_Remover(lot.getId(), false, true), transaction, Constants.TEMP_OBJECT);
 
             // Commit the transaction
             transaction.commit();

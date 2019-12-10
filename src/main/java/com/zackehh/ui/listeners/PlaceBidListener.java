@@ -3,7 +3,7 @@ package com.zackehh.ui.listeners;
 import com.zackehh.auction.U1654949_Bid_Class;
 import com.zackehh.auction.U1654949_Lot_Class;
 import com.zackehh.auction.U1654949_Bid_Counter;
-import com.zackehh.auction.U1654949_Lot_Updater_Class;
+import com.zackehh.auction.U1654949_Lot_Updater;
 import com.zackehh.util.Constants;
 import com.zackehh.util.SpaceUtils;
 import com.zackehh.util.UserUtils;
@@ -113,7 +113,7 @@ public class PlaceBidListener extends MouseAdapter {
                     final U1654949_Bid_Class newBid = new U1654949_Bid_Class(bidNumber, UserUtils.getCurrentUser(), lot.getId(), bid, !privateCheckBox.isSelected());
 
                     // Write all values back to the space
-                    space.write(new U1654949_Lot_Updater_Class(lot.getId(), bid), transaction, Constants.TEMP_OBJECT);
+                    space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, Constants.TEMP_OBJECT);
                     space.write(updatedLot, transaction, Constants.LOT_LEASE_TIMEOUT);
                     space.write(newBid, transaction, Constants.BID_LEASE_TIMEOUT);
                     space.write(secretary, transaction, Lease.FOREVER);
