@@ -54,7 +54,6 @@ public class AuctionRoom extends JFrame {
             System.exit(1);
         }
 
-        SpaceUtils.setHostname(args.length == 0 ? "localhost" : args[0]);
         UserUtils.setCurrentUser(userId);
 
         new AuctionRoom();
