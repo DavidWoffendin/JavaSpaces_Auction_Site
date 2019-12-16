@@ -1,7 +1,7 @@
 package U1654949.User_Interface.Interface_Helpers;
 
 import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot;
 
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.LeaseDeniedException;
@@ -20,7 +20,7 @@ import java.rmi.RemoteException;
 public class AcceptButtonListener extends MouseAdapter {
 
     private JLabel currentPrice;
-    private U1654949_Lot_Space lot;
+    private U1654949_Lot lot;
     private JavaSpace space;
     private TransactionManager manager;
 
@@ -29,7 +29,7 @@ public class AcceptButtonListener extends MouseAdapter {
      * @param lot          Lot for the action listener to perform actions against
      * @param currentPrice Current price of the lot
      */
-    public AcceptButtonListener(U1654949_Lot_Space lot, JLabel currentPrice) {
+    public AcceptButtonListener(U1654949_Lot lot, JLabel currentPrice) {
         this.currentPrice = currentPrice;
         this.lot = lot;
         this.space = U1654949.Space_Utils.getSpace();
@@ -50,7 +50,7 @@ public class AcceptButtonListener extends MouseAdapter {
             try {
                 Transaction.Created trc = TransactionFactory.create(manager, 3000);
                 transaction = trc.transaction;
-                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), transaction, 1500);
+                U1654949_Lot updatedLot = (U1654949_Lot) space.read(new U1654949_Lot(lot.getId()), transaction, 1500);
                 updatedLot.setEnded(true);
                 space.write(new U1654949_Lot_Remover(lot.getId(), true, false), transaction, 3000);
                 transaction.commit();

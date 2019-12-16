@@ -27,22 +27,22 @@ import java.util.ArrayList;
 public class List_Card extends JPanel {
 
     private final JavaSpace auctionSpace;
-    private final TransactionManager manager;
-    private final ArrayList<U1654949_Lot_Space> lots;
-    private final Default_Table lotTable;
+    private final TransactionManager transactionManager;
+    private final ArrayList<U1654949_Lot> lots;
+    private final Default_Table lotList;
 
-    public List_Card(final ArrayList<U1654949_Lot_Space> lots, final JPanel cards){
+    public List_Card(final ArrayList<U1654949_Lot> lots, final JPanel cards){
         super(new BorderLayout());
 
         this.lots = lots;
-        this.manager = Space_Utils.getManager();
+        this.transactionManager = Space_Utils.getManager();
         this.auctionSpace = Space_Utils.getSpace();
 
-        JPanel fieldInputPanel = new JPanel(new GridLayout(4, 2));
+        JPanel fieldInputPanel = new JPanel(new GridLayout(5, 2));
         fieldInputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         final JTextField itemNameIn = new JTextField("", 12);
-        fieldInputPanel.add(new JLabel("Name of Item: "));
+        fieldInputPanel.add(new JLabel("Item Name: "));
         fieldInputPanel.add(itemNameIn);
 
         final JTextField itemDescriptionIn = new JTextField("", 1);
@@ -53,6 +53,10 @@ public class List_Card extends JPanel {
         fieldInputPanel.add(new JLabel("Starting Price: "));
         fieldInputPanel.add(startingPriceIn);
 
+        final JTextField buyNowPriceIn = new JTextField("", 6);
+        fieldInputPanel.add(new JLabel("Buy It Now Price: "));
+        fieldInputPanel.add(buyNowPriceIn);
+
         final Default_Text resultTextOut = new Default_Text();
         fieldInputPanel.add(new JLabel("Result: "));
         fieldInputPanel.add(resultTextOut);
@@ -60,13 +64,13 @@ public class List_Card extends JPanel {
         // Add the layout to the panel
         add(fieldInputPanel, BorderLayout.NORTH);
 
-        lotTable = new Default_Table(new String[0][5], new String[] {
-                "Lot ID", "Item Name", "Seller ID", "Current Price", "Status"
+        lotList = new Default_Table(new String[0][6], new String[] {
+                "Lot ID", "Item Name", "Seller ID", "Current Price", "Buy It Now Price", "Status"
         });
 
-        lotTable.addMouseListener(new MouseAdapter() {
+        lotList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent event) {
-                int row = lotTable.rowAtPoint(event.getPoint());
+                int row = lotList.rowAtPoint(event.getPoint());
 
                 if (event.getClickCount() == 2) {
 
@@ -86,7 +90,7 @@ public class List_Card extends JPanel {
         });
 
         JScrollPane itemListPanel = new JScrollPane(
-                lotTable,
+                lotList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
@@ -94,7 +98,7 @@ public class List_Card extends JPanel {
         add(itemListPanel, BorderLayout.CENTER);
 
         JButton addLotButton = new JButton();
-        addLotButton.setText("Add Auction Item");
+        addLotButton.setText("Add Lot");
 
         addLotButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -103,25 +107,33 @@ public class List_Card extends JPanel {
                 String itemName = itemNameIn.getText();
                 String itemDescription = itemDescriptionIn.getText();
                 Number startingPrice = Common_Functions.getTextAsNumber(startingPriceIn);
-                Double potentialDouble = startingPrice == null ? 0 : startingPrice.doubleValue();
+                Number buyNowPrice = Common_Functions.getTextAsNumber(buyNowPriceIn);
+                Double priceDouble = startingPrice == null ? 0 : startingPrice.doubleValue();
+                Double buyNowDouble = buyNowPrice == null ? 0 : buyNowPrice.doubleValue();
+
 
                 if(itemName.length() == 0 || itemDescription.length() == 0){
                     resultTextOut.setText("Invalid item details!");
                     return;
                 }
 
-                if(startingPrice == null || potentialDouble == 0){
+                if(startingPrice == null || priceDouble == 0){
                     resultTextOut.setText("Invalid price!");
+                    return;
+                }
+
+                if(buyNowPrice == null || buyNowDouble == 0){
+                    resultTextOut.setText("Invalid buy it now price!");
                     return;
                 }
 
                 Transaction transaction = null;
                 try {
-                    Transaction.Created trc = TransactionFactory.create(manager, 3000);
+                    Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
                     transaction = trc.transaction;
-                    U1654949_Lot_Status_Object Counter = (U1654949_Lot_Status_Object) auctionSpace.take(new U1654949_Lot_Status_Object(), null, 1500);
-                    final int lotNumber = Counter.countNewItem();
-                    U1654949_Lot_Space newLot = new U1654949_Lot_Space(lotNumber, User.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
+                    U1654949_Auction_Status_Object Counter = (U1654949_Auction_Status_Object) auctionSpace.take(new U1654949_Auction_Status_Object(), null, 1500);
+                    final int lotNumber = Counter.countLot();
+                    U1654949_Lot newLot = new U1654949_Lot(lotNumber, User.getCurrentUser(), null, itemName, priceDouble, buyNowDouble, itemDescription, false, false);
 
                     auctionSpace.write(newLot, transaction, 3600000);
                     auctionSpace.write(Counter, transaction, Lease.FOREVER);
@@ -130,7 +142,8 @@ public class List_Card extends JPanel {
                     itemNameIn.setText("");
                     itemDescriptionIn.setText("");
                     startingPriceIn.setText("");
-                    resultTextOut.setText("Added Lot #" + lotNumber + "!");
+                    buyNowPriceIn.setText("");
+                    resultTextOut.setText("Added Lot: " + lotNumber + "!");
 
                     lots.add(newLot);
                 } catch(Exception e) {
@@ -153,7 +166,7 @@ public class List_Card extends JPanel {
 
         try {
             auctionSpace.notify(new U1654949_Lot_Updater(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
-            auctionSpace.notify(new U1654949_Lot_Status_Object(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new U1654949_Auction_Status_Object(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
             auctionSpace.notify(new U1654949_Lot_Remover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,7 +174,7 @@ public class List_Card extends JPanel {
     }
 
     public DefaultTableModel getTableModel(){
-        return ((DefaultTableModel) lotTable.getModel());
+        return ((DefaultTableModel) lotList.getModel());
     }
 
     private class NewLotNotifier extends Notifier {
@@ -171,8 +184,8 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                U1654949_Lot_Status_Object Counter = (U1654949_Lot_Status_Object) auctionSpace.read(new U1654949_Lot_Status_Object(), null, 1500);
-                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) auctionSpace.read(new U1654949_Lot_Space(Counter.getItemCounter()), null, 1500);
+                U1654949_Auction_Status_Object Counter = (U1654949_Auction_Status_Object) auctionSpace.read(new U1654949_Auction_Status_Object(), null, 1500);
+                U1654949_Lot latestLot = (U1654949_Lot) auctionSpace.read(new U1654949_Lot(Counter.getLotCounter()), null, 1500);
                 Object[] insertion = latestLot.asObjectArray();
 
                 int currentIndex = -1;
@@ -213,7 +226,7 @@ public class List_Card extends JPanel {
                     return;
                 }
 
-                U1654949_Lot_Space lot = lots.get(currentIndex);
+                U1654949_Lot lot = lots.get(currentIndex);
 
                 lot.setPrice(lotChange.getLotPrice());
 
@@ -247,7 +260,7 @@ public class List_Card extends JPanel {
 
                 if(remover.isEnded()){
                     System.out.println(lots.size());
-                    U1654949_Lot_Space lot = lots.get(currentIndex);
+                    U1654949_Lot lot = lots.get(currentIndex);
 
                     lot.setEnded(true);
 
@@ -265,7 +278,7 @@ public class List_Card extends JPanel {
                     model.removeRow(currentIndex);
                 }
 
-                auctionSpace.takeIfExists(new U1654949_Lot_Space(remover.getId()), null, 1000);
+                auctionSpace.takeIfExists(new U1654949_Lot(remover.getId()), null, 1000);
 
                 Object o;
                 do {

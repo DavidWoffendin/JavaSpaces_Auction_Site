@@ -1,7 +1,7 @@
 package U1654949.User_Interface.Interface_Helpers;
 
 import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot;
 import U1654949.Space_Utils;
 
 import net.jini.core.entry.UnusableEntryException;
@@ -20,7 +20,7 @@ import java.rmi.RemoteException;
  */
 public class RemoveButtonListener extends MouseAdapter {
 
-    private U1654949_Lot_Space lot;
+    private U1654949_Lot lot;
     private JavaSpace space;
     private TransactionManager manager;
 
@@ -28,7 +28,7 @@ public class RemoveButtonListener extends MouseAdapter {
     /**
      * @param lot the lot that this class will perform actions against
      */
-    public RemoveButtonListener(U1654949_Lot_Space lot) {
+    public RemoveButtonListener(U1654949_Lot lot) {
         this.lot = lot;
         this.space = Space_Utils.getSpace();
         this.manager = Space_Utils.getManager();
@@ -47,8 +47,8 @@ public class RemoveButtonListener extends MouseAdapter {
             try {
                 Transaction.Created trc = TransactionFactory.create(manager, 3000);
                 transaction = trc.transaction;
-                U1654949_Lot_Space template = new U1654949_Lot_Space(lot.getId());
-                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(template, transaction, 1500);
+                U1654949_Lot template = new U1654949_Lot(lot.getId());
+                U1654949_Lot updatedLot = (U1654949_Lot) space.read(template, transaction, 1500);
                 updatedLot.setRemoved(true);
                 space.write(new U1654949_Lot_Remover(lot.getId(), false, true), transaction, 3000);
                 transaction.commit();

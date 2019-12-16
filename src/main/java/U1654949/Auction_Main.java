@@ -1,8 +1,7 @@
 package U1654949;
 
-import U1654949.Space_Auction_Items.U1654949_Bid_Status_Object;
-import U1654949.Space_Auction_Items.U1654949_Lot_Status_Object;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Space_Auction_Items.U1654949_Auction_Status_Object;
+import U1654949.Space_Auction_Items.U1654949_Lot;
 import U1654949.User_Interface.List_Card;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
  */
 public class Auction_Main extends JFrame {
 
-    private final ArrayList<U1654949_Lot_Space> lots = new ArrayList<U1654949_Lot_Space>();
+    private final ArrayList<U1654949_Lot> lots = new ArrayList<U1654949_Lot>();
 
     private static JavaSpace auctionSpace;
 
@@ -40,17 +39,17 @@ public class Auction_Main extends JFrame {
             public void run() {
                 DefaultTableModel model = auctionCard.getTableModel();
                 try {
-                    U1654949_Lot_Status_Object counter = (U1654949_Lot_Status_Object) auctionSpace.read(new U1654949_Lot_Status_Object(), null, 1500);
+                    U1654949_Auction_Status_Object counter = (U1654949_Auction_Status_Object) auctionSpace.read(new U1654949_Auction_Status_Object(), null, 1500);
                     int i = 0;
-                    while(i <= counter.getItemCounter()) {
-                        U1654949_Lot_Space template = new U1654949_Lot_Space(i++ + 1, null, null, null, null, null, false, false);
-                        U1654949_Lot_Space latestLot = (U1654949_Lot_Space) auctionSpace.readIfExists(template, null, 1000);
+                    while(i <= counter.getLotCounter()) {
+                        U1654949_Lot template = new U1654949_Lot(i++ + 1, null, null, null, null, null, null, false, false);
+                        U1654949_Lot latestLot = (U1654949_Lot) auctionSpace.readIfExists(template, null, 1000);
                         if (latestLot != null) {
                             lots.add(latestLot);
                             model.addRow(latestLot.asObjectArray());
                         }
                     }
-                    System.out.println(counter.getItemCounter());
+                    System.out.println(counter.getLotCounter());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -84,11 +83,8 @@ public class Auction_Main extends JFrame {
             System.exit(1);
         }
         try {
-            if(auctionSpace.read(new U1654949_Lot_Status_Object(), null, 1000) == null){
-                auctionSpace.write(new U1654949_Lot_Status_Object(0), null, Lease.FOREVER);
-            }
-            if(auctionSpace.read(new U1654949_Bid_Status_Object(), null, 1000) == null){
-                auctionSpace.write(new U1654949_Bid_Status_Object(0), null, Lease.FOREVER);
+            if(auctionSpace.read(new U1654949_Auction_Status_Object(), null, 1000) == null){
+                auctionSpace.write(new U1654949_Auction_Status_Object(0, 0), null, Lease.FOREVER);
             }
         } catch (UnusableEntryException | TransactionException | RemoteException | InterruptedException e) {
             System.err.println("Error: " + e);

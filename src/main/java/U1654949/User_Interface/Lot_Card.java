@@ -2,7 +2,7 @@ package U1654949.User_Interface;
 
 import U1654949.Space_Auction_Items.U1654949_Bid_Space;
 import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot;
 import U1654949.Space_Utils;
 import U1654949.User;
 import U1654949.User_Interface.Defaults.Default_Table;
@@ -21,28 +21,29 @@ import java.util.Vector;
 
 public class Lot_Card extends JPanel {
 
-    private final JavaSpace space;
-    private final Default_Table bidTable;
-    private final U1654949_Lot_Space lot;
-    private final Vector<Vector<String>> bidHistory;
-    private final JLabel acceptBidOrRemoveLot;
-    private final JLabel currentPrice;
-    private final JLabel currentPriceLabel;
+    private final JavaSpace javaSpace;
+    private final Default_Table bidsList;
+    private final U1654949_Lot lot;
+    private final Vector<Vector<String>> bids;
+    private final JLabel acceptOrRemove;
+    private final JLabel price;
+    private final JLabel buyItNowPrice;
+    private final JLabel priceLabel;
     private final JLabel placeBid;
-    private final JPanel cards;
-    private final AcceptButtonListener acceptBidListener;
-    private final RemoveButtonListener removeLotListener;
+    private final JPanel card;
+    private final AcceptButtonListener acceptButtonListener;
+    private final RemoveButtonListener removeButtonListener;
 
-    public Lot_Card(final JPanel cards, U1654949_Lot_Space lotForCard) {
+    public Lot_Card(final JPanel card, U1654949_Lot lotForCard) {
         super();
 
-        this.cards = cards;
-        this.space = Space_Utils.getSpace();
+        this.card = card;
+        this.javaSpace = Space_Utils.getSpace();
 
-        U1654949_Lot_Space baseLot = lotForCard;
+        U1654949_Lot baseLot = lotForCard;
         try {
-            U1654949_Lot_Space templateLot = new U1654949_Lot_Space(lotForCard.getId());
-            baseLot = (U1654949_Lot_Space) space.read(templateLot, null, 1500);
+            U1654949_Lot templateLot = new U1654949_Lot(lotForCard.getId());
+            baseLot = (U1654949_Lot) javaSpace.read(templateLot, null, 1500);
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -58,8 +59,8 @@ public class Lot_Card extends JPanel {
             U1654949_Bid_Space bidTemplate = new U1654949_Bid_Space(null, null, lot.getId(), null);
             U1654949_Lot_Remover removerTemplate = new U1654949_Lot_Remover(lot.getId(), null, null);
 
-            space.notify(bidTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
-            space.notify(removerTemplate, null, lotListener.getListener(), Lease.FOREVER, null);
+            javaSpace.notify(bidTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
+            javaSpace.notify(removerTemplate, null, lotListener.getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -71,28 +72,29 @@ public class Lot_Card extends JPanel {
         back.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {
-                cards.remove(Lot_Card.this);
+                card.remove(Lot_Card.this);
             }
         });
 
         panel.add(back, BorderLayout.WEST);
 
         placeBid = new JLabel("Place Bid");
-        acceptBidOrRemoveLot = new JLabel("Accept Latest Bid");
-        currentPrice = new JLabel();
+        acceptOrRemove = new JLabel("Accept Latest Bid");
+        price = new JLabel();
+        buyItNowPrice = new JLabel();
 
-        acceptBidListener = new AcceptButtonListener(lot, currentPrice);
-        removeLotListener = new RemoveButtonListener(lot);
+        acceptButtonListener = new AcceptButtonListener(lot, price);
+        removeButtonListener = new RemoveButtonListener(lot);
 
         if(!lot.isEnded()) {
             if (User.getCurrentUser().equals(lot.getUser())) {
                 if(lot.getLastBid() == null){
-                    acceptBidOrRemoveLot.setText("Remove Lot");
-                    acceptBidOrRemoveLot.addMouseListener(removeLotListener);
+                    acceptOrRemove.setText("Remove Lot");
+                    acceptOrRemove.addMouseListener(removeButtonListener);
                 } else {
-                    acceptBidOrRemoveLot.addMouseListener(acceptBidListener);
+                    acceptOrRemove.addMouseListener(acceptButtonListener);
                 }
-                panel.add(acceptBidOrRemoveLot, BorderLayout.EAST);
+                panel.add(acceptOrRemove, BorderLayout.EAST);
 
             } else {
                 placeBid.addMouseListener(new PlaceButtonListener(lot));
@@ -109,13 +111,13 @@ public class Lot_Card extends JPanel {
                 "Description"
         };
 
-        JPanel p = new JPanel(new GridLayout(labels.length + 1, 2));
-        p.setBorder(BorderFactory.createEmptyBorder(-8, 0, 10, 0));
+        JPanel lotDetails = new JPanel(new GridLayout(labels.length + 2, 2));
+        lotDetails.setBorder(BorderFactory.createEmptyBorder(-8, 0, 10, 0));
 
         try {
             for (String label : labels) {
                 JLabel l = new JLabel(label + ": ", SwingConstants.RIGHT);
-                p.add(l);
+                lotDetails.add(l);
 
                 Class<?> c = lot.getClass();
                 Method method = c.getMethod(Common_Functions.toCamelCase("get " + label, " "));
@@ -124,34 +126,37 @@ public class Lot_Card extends JPanel {
 
                 JLabel textLabel = new JLabel(valueOfField);
                 l.setLabelFor(textLabel);
-                p.add(textLabel);
+                lotDetails.add(textLabel);
             }
         } catch (Exception e) {
         }
 
-        bidHistory = Common_Functions.getVectorBidMatrix(lot);
+        bids = Common_Functions.getVectorBidMatrix(lot);
 
         if(lot.isEnded()){
             // Display the winner and the price the item was won for
-            currentPriceLabel = new JLabel("Won by " + bidHistory.get(0).get(0) + " -", SwingConstants.RIGHT);
-            currentPrice.setText(" Price: " + Common_Functions.getDoubleAsCurrency(lot.getPrice()));
+            priceLabel = new JLabel("Won by " + bids.get(0).get(0) + " -", SwingConstants.RIGHT);
+            price.setText(" Price: " + Common_Functions.getDoubleAsCurrency(lot.getPrice()));
+            buyItNowPrice.setText(Common_Functions.getDoubleAsCurrency(lot.getBuyNowPricePrice()));
         } else {
-            currentPriceLabel = new JLabel("Current Price: ", SwingConstants.RIGHT);
-            currentPrice.setText(Common_Functions.getDoubleAsCurrency(lot.getPrice()));
+            priceLabel = new JLabel("Current Price: ", SwingConstants.RIGHT);
+            price.setText(Common_Functions.getDoubleAsCurrency(lot.getPrice()));
+            buyItNowPrice.setText(Common_Functions.getDoubleAsCurrency(lot.getBuyNowPricePrice()));
         }
 
-        currentPriceLabel.setLabelFor(currentPrice);
-        p.add(currentPriceLabel);
-        p.add(currentPrice);
+        priceLabel.setLabelFor(price);
+        lotDetails.add(priceLabel);
+        lotDetails.add(price);
+        lotDetails.add(buyItNowPrice);
 
-        add(p);
+        add(lotDetails);
 
-        bidTable = new Default_Table(bidHistory, new Vector<String>(){{
+        bidsList = new Default_Table(bids, new Vector<String>(){{
             add("Buyer ID");
             add("Bid Amount");
         }});
 
-        JScrollPane itemListPanel = new JScrollPane(bidTable);
+        JScrollPane itemListPanel = new JScrollPane(bidsList);
 
         add(itemListPanel, BorderLayout.SOUTH);
     }
@@ -161,8 +166,8 @@ public class Lot_Card extends JPanel {
         @Override
         public void notify(RemoteEvent ev) {
             try {
-                final U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, 1500);
-                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) space.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, 1500);
+                final U1654949_Lot latestLot = (U1654949_Lot) javaSpace.read(new U1654949_Lot(lot.getId()), null, 1500);
+                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) javaSpace.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, 1500);
 
                 Vector<String> insertion = new Vector<String>(){{
                     add(latestBid.getUser().getId());
@@ -170,16 +175,16 @@ public class Lot_Card extends JPanel {
                 }};
 
                 if(latestLot.getLastBid() != null && User.getCurrentUser().equals(lot.getUser())){
-                    acceptBidOrRemoveLot.setText("Accept Latest Bid");
-                    acceptBidOrRemoveLot.addMouseListener(acceptBidListener);
-                    acceptBidOrRemoveLot.removeMouseListener(removeLotListener);
+                    acceptOrRemove.setText("Accept Latest Bid");
+                    acceptOrRemove.addMouseListener(acceptButtonListener);
+                    acceptOrRemove.removeMouseListener(removeButtonListener);
                 }
 
-                bidHistory.add(0, insertion);
+                bids.add(0, insertion);
 
-                bidTable.revalidate();
+                bidsList.revalidate();
 
-                currentPrice.setText(Common_Functions.getDoubleAsCurrency(latestLot.getPrice()));
+                price.setText(Common_Functions.getDoubleAsCurrency(latestLot.getPrice()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -191,26 +196,26 @@ public class Lot_Card extends JPanel {
         @Override
         public void notify(RemoteEvent ev) {
             try {
-                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(lot.getId()), null, 1500);
+                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) javaSpace.read(new U1654949_Lot_Remover(lot.getId()), null, 1500);
 
                 if(remover.isEnded()){
-                    Vector<String> winningBid = bidHistory.get(0);
+                    Vector<String> winningBid = bids.get(0);
 
                     String winningId = winningBid.get(0);
                     String winningPrice = winningBid.get(1);
 
-                    acceptBidOrRemoveLot.setVisible(false);
+                    acceptOrRemove.setVisible(false);
                     placeBid.setVisible(false);
 
-                    currentPriceLabel.setText("Won by " + winningId + " -");
-                    currentPrice.setText(" Price: " + winningPrice);
+                    priceLabel.setText("Won by " + winningId + " -");
+                    price.setText(" Price: " + winningPrice);
 
                     return;
                 }
 
                 if(remover.isRemoved()){
                     JOptionPane.showMessageDialog(null, "This lot has been removed!");
-                    cards.remove(Lot_Card.this);
+                    card.remove(Lot_Card.this);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

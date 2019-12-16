@@ -21,7 +21,7 @@ import java.rmi.RemoteException;
  */
 public class PlaceButtonListener extends MouseAdapter {
 
-    private U1654949_Lot_Space lot;
+    private U1654949_Lot lot;
     private JavaSpace space;
     private TransactionManager manager;
 
@@ -29,7 +29,7 @@ public class PlaceButtonListener extends MouseAdapter {
     /**
      * @param lot
      */
-    public PlaceButtonListener(U1654949_Lot_Space lot) {
+    public PlaceButtonListener(U1654949_Lot lot) {
         this.lot = lot;
         this.space = U1654949.Space_Utils.getSpace();
         this.manager = U1654949.Space_Utils.getManager();
@@ -55,10 +55,10 @@ public class PlaceButtonListener extends MouseAdapter {
                     Transaction.Created trc = TransactionFactory.create(manager, 3000);
                     transaction = trc.transaction;
 
-                    U1654949_Bid_Status_Object counter = (U1654949_Bid_Status_Object) space.take(new U1654949_Bid_Status_Object(), transaction, 1500);
-                    U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.take(new U1654949_Lot_Space(lot.getId()), transaction, 1500);
+                    U1654949_Auction_Status_Object bidCounter = (U1654949_Auction_Status_Object) space.take(new U1654949_Auction_Status_Object(), transaction, 1500);
+                    U1654949_Lot updatedLot = (U1654949_Lot) space.take(new U1654949_Lot(lot.getId()), transaction, 1500);
 
-                    int bidNumber = counter.countNewItem();
+                    int bidNumber = bidCounter.countBid();
 
                     updatedLot.getBids().add(bidNumber);
                     updatedLot.setPrice(bid);
@@ -68,7 +68,7 @@ public class PlaceButtonListener extends MouseAdapter {
                     space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, 3000);
                     space.write(updatedLot, transaction, 3600000);
                     space.write(newBid, transaction, 5000000);
-                    space.write(counter, transaction, Lease.FOREVER);
+                    space.write(bidCounter, transaction, Lease.FOREVER);
 
                     transaction.commit();
 

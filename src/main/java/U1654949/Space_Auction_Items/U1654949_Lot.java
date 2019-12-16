@@ -8,10 +8,11 @@ import java.util.ArrayList;
 /**
  * Class that represents the lots within the auction system
  */
-public class U1654949_Lot_Space implements Entry {
+public class U1654949_Lot implements Entry {
 
     public Integer id;
     public Double price;
+    public Double buyNowPrice;
     public ArrayList<Integer> bids;
     public String name;
     public String description;
@@ -22,13 +23,13 @@ public class U1654949_Lot_Space implements Entry {
     /**
      * empty constructor
      */
-    public U1654949_Lot_Space() {
+    public U1654949_Lot() {
     }
 
     /**
      * @param id constructor just using lot id
      */
-    public U1654949_Lot_Space(Integer id) {
+    public U1654949_Lot(Integer id) {
         this.id = id;
     }
 
@@ -42,10 +43,11 @@ public class U1654949_Lot_Space implements Entry {
      * @param ended       Boolean tracking if the lot ended
      * @param removed     Boolean tracking if lot was removed early
      */
-    public U1654949_Lot_Space(Integer id, U1654949_User user, ArrayList<Integer> bids, String name, Double price, String description, Boolean ended, Boolean removed) {
+    public U1654949_Lot(Integer id, U1654949_User user, ArrayList<Integer> bids, String name, Double price, Double buyNowPrice, String description, Boolean ended, Boolean removed) {
         this.id = id;
         this.user = user;
         this.bids = bids;
+        this.buyNowPrice = buyNowPrice;
         this.name = name;
         this.price = price;
         this.description = description;
@@ -58,7 +60,7 @@ public class U1654949_Lot_Space implements Entry {
         return id;
     }
 
-    public U1654949_Lot_Space setId(Integer id) {
+    public U1654949_Lot setId(Integer id) {
         this.id = id;
         return this;
     }
@@ -67,8 +69,17 @@ public class U1654949_Lot_Space implements Entry {
         return price;
     }
 
-    public U1654949_Lot_Space setPrice(Double price) {
+    public U1654949_Lot setPrice(Double price) {
         this.price = price;
+        return this;
+    }
+
+    public Double getBuyNowPricePrice() {
+        return buyNowPrice;
+    }
+
+    public U1654949_Lot setBuyNowPrice(Double buyNowPrice) {
+        this.price = buyNowPrice;
         return this;
     }
 
@@ -79,7 +90,7 @@ public class U1654949_Lot_Space implements Entry {
         return bids;
     }
 
-    public U1654949_Lot_Space setBids(ArrayList<Integer> bids) {
+    public U1654949_Lot setBids(ArrayList<Integer> bids) {
         this.bids = bids;
         return this;
     }
@@ -88,7 +99,7 @@ public class U1654949_Lot_Space implements Entry {
         return name;
     }
 
-    public U1654949_Lot_Space setName(String name) {
+    public U1654949_Lot setName(String name) {
         this.name = name;
         return this;
     }
@@ -97,7 +108,7 @@ public class U1654949_Lot_Space implements Entry {
         return description;
     }
 
-    public U1654949_Lot_Space setDescription(String description) {
+    public U1654949_Lot setDescription(String description) {
         this.description = description;
         return this;
     }
@@ -110,7 +121,7 @@ public class U1654949_Lot_Space implements Entry {
         return user.getId();
     }
 
-    public U1654949_Lot_Space setUser(U1654949_User user) {
+    public U1654949_Lot setUser(U1654949_User user) {
         this.user = user;
         return this;
     }
@@ -119,7 +130,7 @@ public class U1654949_Lot_Space implements Entry {
         return ended != null && ended;
     }
 
-    public U1654949_Lot_Space setEnded(Boolean ended) {
+    public U1654949_Lot setEnded(Boolean ended) {
         this.ended = ended;
         return this;
     }
@@ -128,7 +139,7 @@ public class U1654949_Lot_Space implements Entry {
         return removed != null && removed;
     }
 
-    public U1654949_Lot_Space setRemoved(Boolean removed) {
+    public U1654949_Lot setRemoved(Boolean removed) {
         this.removed = removed;
         return this;
     }

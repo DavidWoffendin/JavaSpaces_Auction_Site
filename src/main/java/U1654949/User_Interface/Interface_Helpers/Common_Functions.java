@@ -2,7 +2,7 @@ package U1654949.User_Interface.Interface_Helpers;
 
 import U1654949.Space_Utils;
 import U1654949.Space_Auction_Items.U1654949_Bid_Space;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
+import U1654949.Space_Auction_Items.U1654949_Lot;
 import net.jini.space.JavaSpace;
 
 import javax.swing.text.JTextComponent;
@@ -67,7 +67,7 @@ public class Common_Functions {
 
     }
 
-    public static ArrayList<U1654949_Bid_Space> getBidHistory(U1654949_Lot_Space lot) {
+    public static ArrayList<U1654949_Bid_Space> getBidHistory(U1654949_Lot lot) {
         JavaSpace space = Space_Utils.getSpace();
 
         // Initialise a list to store history
@@ -75,7 +75,7 @@ public class Common_Functions {
 
         try {
             // Fetch the latest version of the lot
-            U1654949_Lot_Space refreshedLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, 1500);
+            U1654949_Lot refreshedLot = (U1654949_Lot) space.read(new U1654949_Lot(lot.getId()), null, 1500);
 
             // Get the history from the lot
             ArrayList<Integer> bids = refreshedLot.getBids();
@@ -109,7 +109,7 @@ public class Common_Functions {
         return bidHistory;
     }
 
-    public static Vector<Vector<String>> getVectorBidMatrix(U1654949_Lot_Space lot){
+    public static Vector<Vector<String>> getVectorBidMatrix(U1654949_Lot lot){
         // Get the list of historic bids
         ArrayList<U1654949_Bid_Space> bids = getBidHistory(lot);
 
