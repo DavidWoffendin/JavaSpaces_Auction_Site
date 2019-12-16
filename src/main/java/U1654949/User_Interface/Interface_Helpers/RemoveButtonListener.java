@@ -1,6 +1,5 @@
 package U1654949.User_Interface.Interface_Helpers;
 
-import U1654949.Default_Variables;
 import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
 import U1654949.Space_Auction_Items.U1654949_Lot_Space;
 import U1654949.Space_Utils;
@@ -49,9 +48,9 @@ public class RemoveButtonListener extends MouseAdapter {
                 Transaction.Created trc = TransactionFactory.create(manager, 3000);
                 transaction = trc.transaction;
                 U1654949_Lot_Space template = new U1654949_Lot_Space(lot.getId());
-                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(template, transaction, Default_Variables.SPACE_TIMEOUT);
+                U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.read(template, transaction, 1500);
                 updatedLot.setRemoved(true);
-                space.write(new U1654949_Lot_Remover(lot.getId(), false, true), transaction, Default_Variables.TEMP_OBJECT);
+                space.write(new U1654949_Lot_Remover(lot.getId(), false, true), transaction, 3000);
                 transaction.commit();
                 lot = updatedLot;
             } catch (RemoteException | LeaseDeniedException | TransactionException | InterruptedException | UnusableEntryException e) {

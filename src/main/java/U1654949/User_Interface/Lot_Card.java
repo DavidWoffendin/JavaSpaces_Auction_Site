@@ -1,6 +1,5 @@
 package U1654949.User_Interface;
 
-import U1654949.Default_Variables;
 import U1654949.Space_Auction_Items.U1654949_Bid_Space;
 import U1654949.Space_Auction_Items.U1654949_Lot_Remover;
 import U1654949.Space_Auction_Items.U1654949_Lot_Space;
@@ -43,7 +42,7 @@ public class Lot_Card extends JPanel {
         U1654949_Lot_Space baseLot = lotForCard;
         try {
             U1654949_Lot_Space templateLot = new U1654949_Lot_Space(lotForCard.getId());
-            baseLot = (U1654949_Lot_Space) space.read(templateLot, null, Default_Variables.SPACE_TIMEOUT);
+            baseLot = (U1654949_Lot_Space) space.read(templateLot, null, 1500);
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -162,8 +161,8 @@ public class Lot_Card extends JPanel {
         @Override
         public void notify(RemoteEvent ev) {
             try {
-                final U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, Default_Variables.SPACE_TIMEOUT);
-                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) space.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, Default_Variables.SPACE_TIMEOUT);
+                final U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(lot.getId()), null, 1500);
+                final U1654949_Bid_Space latestBid = (U1654949_Bid_Space) space.read(new U1654949_Bid_Space(latestLot.getLastBid()), null, 1500);
 
                 Vector<String> insertion = new Vector<String>(){{
                     add(latestBid.getUser().getId());
@@ -192,7 +191,7 @@ public class Lot_Card extends JPanel {
         @Override
         public void notify(RemoteEvent ev) {
             try {
-                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(lot.getId()), null, Default_Variables.SPACE_TIMEOUT);
+                final U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(lot.getId()), null, 1500);
 
                 if(remover.isEnded()){
                     Vector<String> winningBid = bidHistory.get(0);

@@ -1,10 +1,6 @@
 package U1654949.User_Interface.Interface_Helpers;
 
-import U1654949.Default_Variables;
-import U1654949.Space_Auction_Items.U1654949_Bid_Space;
-import U1654949.Space_Auction_Items.U1654949_Lot_Counter;
-import U1654949.Space_Auction_Items.U1654949_Lot_Space;
-import U1654949.Space_Auction_Items.U1654949_Lot_Updater;
+import U1654949.Space_Auction_Items.*;
 import U1654949.User;
 
 import net.jini.core.entry.UnusableEntryException;
@@ -53,14 +49,14 @@ public class PlaceButtonListener extends MouseAdapter {
         if (result == JOptionPane.OK_OPTION) {
             Double bid;
             String bidString = bidEntry.getText();
-            if (bidString.matches(Default_Variables.CURRENCY_REGEX) && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()) {
+            if (bidString.matches("(?=.)^\\$?(([1-9][0-9]{0,2}(,[0-9]{3})*)|[0-9]+)?(\\.[0-9]{1,2})?$") && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()) {
                 Transaction transaction = null;
                 try {
                     Transaction.Created trc = TransactionFactory.create(manager, 3000);
                     transaction = trc.transaction;
 
-                    U1654949_Lot_Counter counter = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Default_Variables.SPACE_TIMEOUT);
-                    U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.take(new U1654949_Lot_Space(lot.getId()), transaction, Default_Variables.SPACE_TIMEOUT);
+                    U1654949_Bid_Status_Object counter = (U1654949_Bid_Status_Object) space.take(new U1654949_Bid_Status_Object(), transaction, 1500);
+                    U1654949_Lot_Space updatedLot = (U1654949_Lot_Space) space.take(new U1654949_Lot_Space(lot.getId()), transaction, 1500);
 
                     int bidNumber = counter.countNewItem();
 
@@ -69,9 +65,9 @@ public class PlaceButtonListener extends MouseAdapter {
 
                     U1654949_Bid_Space newBid = new U1654949_Bid_Space(bidNumber, User.getCurrentUser(), lot.getId(), bid);
 
-                    space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, Default_Variables.TEMP_OBJECT);
-                    space.write(updatedLot, transaction, Default_Variables.LOT_LEASE_TIMEOUT);
-                    space.write(newBid, transaction, Default_Variables.BID_LEASE_TIMEOUT);
+                    space.write(new U1654949_Lot_Updater(lot.getId(), bid), transaction, 3000);
+                    space.write(updatedLot, transaction, 3600000);
+                    space.write(newBid, transaction, 5000000);
                     space.write(counter, transaction, Lease.FOREVER);
 
                     transaction.commit();

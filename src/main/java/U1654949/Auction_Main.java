@@ -1,7 +1,7 @@
 package U1654949;
 
-import U1654949.Space_Auction_Items.U1654949_Bid_Counter;
-import U1654949.Space_Auction_Items.U1654949_Lot_Counter;
+import U1654949.Space_Auction_Items.U1654949_Bid_Status_Object;
+import U1654949.Space_Auction_Items.U1654949_Lot_Status_Object;
 import U1654949.Space_Auction_Items.U1654949_Lot_Space;
 import U1654949.User_Interface.List_Card;
 import net.jini.core.entry.UnusableEntryException;
@@ -40,9 +40,9 @@ public class Auction_Main extends JFrame {
             public void run() {
                 DefaultTableModel model = auctionCard.getTableModel();
                 try {
-                    U1654949_Lot_Counter secretary = (U1654949_Lot_Counter) auctionSpace.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
+                    U1654949_Lot_Status_Object counter = (U1654949_Lot_Status_Object) auctionSpace.read(new U1654949_Lot_Status_Object(), null, 1500);
                     int i = 0;
-                    while(i <= secretary.getItemCounter()) {
+                    while(i <= counter.getItemCounter()) {
                         U1654949_Lot_Space template = new U1654949_Lot_Space(i++ + 1, null, null, null, null, null, false, false);
                         U1654949_Lot_Space latestLot = (U1654949_Lot_Space) auctionSpace.readIfExists(template, null, 1000);
                         if (latestLot != null) {
@@ -50,6 +50,7 @@ public class Auction_Main extends JFrame {
                             model.addRow(latestLot.asObjectArray());
                         }
                     }
+                    System.out.println(counter.getItemCounter());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -58,7 +59,7 @@ public class Auction_Main extends JFrame {
     }
 
     private List_Card Interface_Starter() {
-        setTitle(Default_Variables.APPLICATION_TITLE + " - " + User.getCurrentUser().getId());
+        setTitle("Auction Room - " + User.getCurrentUser().getId());
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {
                 System.exit(0);
@@ -68,10 +69,10 @@ public class Auction_Main extends JFrame {
         cp.setLayout(new BorderLayout());
         JPanel cards = new JPanel(new CardLayout());
         final List_Card auctionCard = new List_Card(lots, cards);
-        cards.add(auctionCard, Default_Variables.AUCTION_CARD);
+        cards.add(auctionCard, "Auction");
         cp.add(cards);
         pack();
-        setResizable(false);
+        setResizable(true);
         setVisible(true);
         return auctionCard;
     }
@@ -83,11 +84,11 @@ public class Auction_Main extends JFrame {
             System.exit(1);
         }
         try {
-            if (auctionSpace.read(new U1654949_Lot_Counter(), null, 1000) == null) {
-                auctionSpace.write(new U1654949_Lot_Counter(), null, Lease.FOREVER);
+            if(auctionSpace.read(new U1654949_Lot_Status_Object(), null, 1000) == null){
+                auctionSpace.write(new U1654949_Lot_Status_Object(0), null, Lease.FOREVER);
             }
-            if (auctionSpace.read(new U1654949_Bid_Counter(), null, 1000) == null) {
-                auctionSpace.write(new U1654949_Bid_Counter(), null, Lease.FOREVER);
+            if(auctionSpace.read(new U1654949_Bid_Status_Object(), null, 1000) == null){
+                auctionSpace.write(new U1654949_Bid_Status_Object(0), null, Lease.FOREVER);
             }
         } catch (UnusableEntryException | TransactionException | RemoteException | InterruptedException e) {
             System.err.println("Error: " + e);

@@ -5,20 +5,20 @@ import net.jini.core.entry.Entry;
 /**
  * Counter class used to count certain objects within the space
  */
-public class U1654949_Inherit_Counter implements Entry {
+public class U1654949_Lot_Status_Object implements Entry {
 
     public Integer itemCounter;
 
     /**
-     * empty constructor
+     * No args Constructor
      */
-    public U1654949_Inherit_Counter() {
+    public U1654949_Lot_Status_Object() {
     }
 
     /**
      * @param itemCounter constructor requiring itemCounter
      */
-    public U1654949_Inherit_Counter(int itemCounter) {
+    public U1654949_Lot_Status_Object(int itemCounter) {
         this.itemCounter = itemCounter;
     }
 

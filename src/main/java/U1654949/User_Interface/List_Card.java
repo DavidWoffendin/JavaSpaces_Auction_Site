@@ -1,6 +1,5 @@
 package U1654949.User_Interface;
 
-import U1654949.Default_Variables;
 import U1654949.Space_Auction_Items.*;
 import U1654949.Space_Utils;
 import U1654949.User;
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 
 public class List_Card extends JPanel {
 
-    private final JavaSpace space;
+    private final JavaSpace auctionSpace;
     private final TransactionManager manager;
     private final ArrayList<U1654949_Lot_Space> lots;
     private final Default_Table lotTable;
@@ -37,7 +36,7 @@ public class List_Card extends JPanel {
 
         this.lots = lots;
         this.manager = Space_Utils.getManager();
-        this.space = Space_Utils.getSpace();
+        this.auctionSpace = Space_Utils.getSpace();
 
         JPanel fieldInputPanel = new JPanel(new GridLayout(4, 2));
         fieldInputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -80,8 +79,8 @@ public class List_Card extends JPanel {
                         JOptionPane.showMessageDialog(null, "This item is no longer available!");
                         return;
                     }
-                    cards.add(new Lot_Card(cards, lots.get(row)), Default_Variables.BID_CARD);
-                    ((CardLayout) cards.getLayout()).show(cards, Default_Variables.BID_CARD);
+                    cards.add(new Lot_Card(cards, lots.get(row)), "Bid");
+                    ((CardLayout) cards.getLayout()).show(cards, "Bid");
                 }
             }
         });
@@ -120,15 +119,12 @@ public class List_Card extends JPanel {
                 try {
                     Transaction.Created trc = TransactionFactory.create(manager, 3000);
                     transaction = trc.transaction;
-
-                    U1654949_Lot_Counter Counter = (U1654949_Lot_Counter) space.take(new U1654949_Lot_Counter(), transaction, Default_Variables.SPACE_TIMEOUT);
-
+                    U1654949_Lot_Status_Object Counter = (U1654949_Lot_Status_Object) auctionSpace.take(new U1654949_Lot_Status_Object(), null, 1500);
                     final int lotNumber = Counter.countNewItem();
-
                     U1654949_Lot_Space newLot = new U1654949_Lot_Space(lotNumber, User.getCurrentUser(), null, itemName, potentialDouble, itemDescription, false, false);
 
-                    space.write(newLot, transaction, Default_Variables.LOT_LEASE_TIMEOUT);
-                    space.write(Counter, transaction, Lease.FOREVER);
+                    auctionSpace.write(newLot, transaction, 3600000);
+                    auctionSpace.write(Counter, transaction, Lease.FOREVER);
 
                     transaction.commit();
                     itemNameIn.setText("");
@@ -137,7 +133,6 @@ public class List_Card extends JPanel {
                     resultTextOut.setText("Added Lot #" + lotNumber + "!");
 
                     lots.add(newLot);
-                    getTableModel().addRow(newLot.asObjectArray());
                 } catch(Exception e) {
                     e.printStackTrace();
                     try {
@@ -157,9 +152,9 @@ public class List_Card extends JPanel {
         add(bidListingPanel, BorderLayout.SOUTH);
 
         try {
-            space.notify(new U1654949_Lot_Updater(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
-            space.notify(new U1654949_Lot_Counter(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
-            space.notify(new U1654949_Lot_Remover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new U1654949_Lot_Updater(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new U1654949_Lot_Status_Object(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new U1654949_Lot_Remover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,28 +171,20 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                U1654949_Lot_Counter Counter = (U1654949_Lot_Counter) space.read(new U1654949_Lot_Counter(), null, Default_Variables.SPACE_TIMEOUT);
-                System.out.println(Counter.getItemCounter());
-                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) space.read(new U1654949_Lot_Space(Counter.getItemCounter()), null, Default_Variables.SPACE_TIMEOUT);
-                System.out.println(latestLot);
-
+                U1654949_Lot_Status_Object Counter = (U1654949_Lot_Status_Object) auctionSpace.read(new U1654949_Lot_Status_Object(), null, 1500);
+                U1654949_Lot_Space latestLot = (U1654949_Lot_Space) auctionSpace.read(new U1654949_Lot_Space(Counter.getItemCounter()), null, 1500);
                 Object[] insertion = latestLot.asObjectArray();
 
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
-                    if (lots.get(i).getId() == latestLot.getId()) {
+                    if (lots.get(i).getId().intValue() == latestLot.getId().intValue()) {
                         currentIndex = i;
                         break;
                     }
                 }
+                lots.add(latestLot);
+                model.addRow(insertion);
 
-                if(currentIndex == -1) {
-                    lots.add(latestLot);
-                    model.addRow(insertion);
-                } else {
-                    lots.set(currentIndex, latestLot);
-                    model.setValueAt(insertion[3], currentIndex, 3);
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -212,11 +199,11 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) space.read(new U1654949_Lot_Updater(), null, Default_Variables.SPACE_TIMEOUT);
+                U1654949_Lot_Updater lotChange = (U1654949_Lot_Updater) auctionSpace.read(new U1654949_Lot_Updater(), null, 1500);
 
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
-                    if (lots.get(i).getId() == lotChange.getLotId()) {
+                    if (lots.get(i).getId().equals(lotChange.getLotId())) {
                         currentIndex = i;
                         break;
                     }
@@ -248,7 +235,7 @@ public class List_Card extends JPanel {
             DefaultTableModel model = getTableModel();
 
             try {
-                U1654949_Lot_Remover remover = (U1654949_Lot_Remover) space.read(new U1654949_Lot_Remover(), null, Default_Variables.SPACE_TIMEOUT);
+                U1654949_Lot_Remover remover = (U1654949_Lot_Remover) auctionSpace.read(new U1654949_Lot_Remover(), null, 1500);
 
                 int currentIndex = 0;
                 for (int i = 0, j = lots.size(); i < j; i++){
@@ -278,11 +265,11 @@ public class List_Card extends JPanel {
                     model.removeRow(currentIndex);
                 }
 
-                space.takeIfExists(new U1654949_Lot_Space(remover.getId()), null, 1000);
+                auctionSpace.takeIfExists(new U1654949_Lot_Space(remover.getId()), null, 1000);
 
                 Object o;
                 do {
-                    o = space.takeIfExists(new U1654949_Bid_Space(remover.getId()), null, 1000);
+                    o = auctionSpace.takeIfExists(new U1654949_Bid_Space(remover.getId()), null, 1000);
                 } while(o != null);
             } catch (Exception e) {
                 e.printStackTrace();
