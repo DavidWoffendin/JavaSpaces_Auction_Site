@@ -3,11 +3,11 @@ package U1654949.Space_Auction_Items;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class U1654949_User implements Serializable {
+public class DWUser implements Serializable {
 
     public final String id;
 
-    public U1654949_User(String id){
+    public DWUser(String id){
         this.id = id;
     }
 
@@ -20,7 +20,7 @@ public class U1654949_User implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        U1654949_User that = (U1654949_User) o;
+        DWUser that = (DWUser) o;
 
         return Objects.equals(this.id, that.id);
     }

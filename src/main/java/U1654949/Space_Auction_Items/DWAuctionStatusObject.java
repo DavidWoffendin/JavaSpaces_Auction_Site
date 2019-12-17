@@ -5,7 +5,7 @@ import net.jini.core.entry.Entry;
 /**
  * Counter class used to count certain objects within the space
  */
-public class U1654949_Auction_Status_Object implements Entry {
+public class DWAuctionStatusObject implements Entry {
 
     public Integer lotCounter;
     public Integer bidCounter;
@@ -13,14 +13,14 @@ public class U1654949_Auction_Status_Object implements Entry {
     /**
      * No args Constructor
      */
-    public U1654949_Auction_Status_Object() {
+    public DWAuctionStatusObject() {
     }
 
     /**
      * @param lotCounter Int to count lots
      * @param bidCounter Int to count bids
      */
-    public U1654949_Auction_Status_Object(int lotCounter, int bidCounter) {
+    public DWAuctionStatusObject(int lotCounter, int bidCounter) {
         this.lotCounter = lotCounter;
         this.bidCounter = bidCounter;
     }
@@ -38,15 +38,15 @@ public class U1654949_Auction_Status_Object implements Entry {
     }
 
     public Integer getBidCounter() {
-        return lotCounter;
+        return bidCounter;
     }
 
     public void setBidCounter(Integer lotCounter) {
-        this.lotCounter = lotCounter;
+        this.bidCounter = bidCounter;
     }
 
     public Integer countBid() {
-        return ++lotCounter;
+        return ++bidCounter;
     }
 
 }

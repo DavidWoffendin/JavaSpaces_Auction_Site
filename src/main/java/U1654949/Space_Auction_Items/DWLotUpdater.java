@@ -5,7 +5,7 @@ import net.jini.core.entry.Entry;
 /**
  * Class for handling lot updates
  */
-public class U1654949_Lot_Updater implements Entry {
+public class DWLotUpdater implements Entry {
 
     public Integer lotId;
     public Double lotPrice;
@@ -13,13 +13,13 @@ public class U1654949_Lot_Updater implements Entry {
     /**
      * empty constructor
      */
-    public U1654949_Lot_Updater() {
+    public DWLotUpdater() {
     }
 
     /**
      * @param id lot is based constructor
      */
-    public U1654949_Lot_Updater(Integer id) {
+    public DWLotUpdater(Integer id) {
         this.lotId = id;
     }
 
@@ -27,7 +27,7 @@ public class U1654949_Lot_Updater implements Entry {
      * @param id Lot Id
      * @param price price of lot
      */
-    public U1654949_Lot_Updater(Integer id, Double price) {
+    public DWLotUpdater(Integer id, Double price) {
         this.lotId = id;
         this.lotPrice = price;
     }

@@ -8,28 +8,32 @@ import javax.swing.*;
 import java.awt.event.MouseEvent;
 
 /**
- * Class implementing the remove listener for the remove lot button
+ * Class for the accept bid button
  */
-public class RemoveButtonListener extends Listener {
+public class BuyItNowButtonListener extends Listener {
 
     private DWLot lot;
     private JavaSpace javaSpace;
     private TransactionManager transactionManager;
 
-    public RemoveButtonListener(DWLot lot) {
+    /**
+     * @param lot Lot for the action listener to perform actions against
+     */
+    public BuyItNowButtonListener(DWLot lot) {
         super(lot);
     }
 
+    /**
+     * @param lot Lot for the action listener to perform actions against
+     */
 
     @Override
     public void mouseClicked(MouseEvent event) {
-        JPanel modal = new JPanel();
-        modal.add(new JLabel("Are you sure you want to remove the lot?"));
-        int result = JOptionPane.showConfirmDialog(null, modal, "Remove Lot?", JOptionPane.OK_CANCEL_OPTION);
-        System.out.println("Remove");
+        int result = JOptionPane.showConfirmDialog(null, "Do you want to buy this lot?", "Buy It Now?", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            lotRemove(false, true, true);
+            lotRemove(false, false, true);
         }
-
     }
 }
+
+

@@ -5,7 +5,7 @@ import net.jini.core.entry.Entry;
 /**
  * Lot class designed to keep track of ended lot items
  */
-public class U1654949_Lot_Remover implements Entry {
+public class DWLotRemover implements Entry {
 
     public Integer id;
     public Boolean ended;
@@ -13,15 +13,15 @@ public class U1654949_Lot_Remover implements Entry {
     public Boolean boughtOutright;
 
     /**
-     * Empty Constructor
+     * No args constructor
      */
-    public U1654949_Lot_Remover() {
+    public DWLotRemover() {
     }
 
     /**
      * @param id Lot Id based constructor
      */
-    public U1654949_Lot_Remover(Integer id) {
+    public DWLotRemover(Integer id) {
         this.id = id;
     }
 
@@ -31,10 +31,11 @@ public class U1654949_Lot_Remover implements Entry {
      * @param remove was the lot removed boolean
      * @param boughtOutright was the lot bought outright boolean
      */
-    public U1654949_Lot_Remover(Integer id, Boolean end, Boolean remove) {
+    public DWLotRemover(Integer id, Boolean end, Boolean remove, Boolean boughtOutright) {
         this.id = id;
         this.ended = end;
         this.removed = remove;
+        this.boughtOutright = boughtOutright;
     }
 
     public Integer getId() {
@@ -59,5 +60,13 @@ public class U1654949_Lot_Remover implements Entry {
 
     public void setRemoved(Boolean removed) {
         this.removed = removed;
+    }
+
+    public Boolean isBoughtOutright() {
+        return boughtOutright;
+    }
+
+    public void isBoughtOutright(Boolean boughtOutright) {
+        this.boughtOutright = boughtOutright;
     }
 }

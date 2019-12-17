@@ -24,18 +24,13 @@ public class Space_Utils {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
-
         JavaSpace js = null;
         try {
             LookupLocator l = new LookupLocator("jini://" + "waterloo");
-
             ServiceRegistrar sr = l.getRegistrar();
-
             Class c = Class.forName("net.jini.space.JavaSpace");
             Class[] classTemplate = {c};
-
             js = (JavaSpace) sr.lookup(new ServiceTemplate(null, classTemplate, null));
-
         } catch (ClassNotFoundException | IOException e) {
             System.err.println("Error: " + e);
         }
@@ -53,14 +48,10 @@ public class Space_Utils {
         TransactionManager tm = null;
         try {
             LookupLocator l = new LookupLocator("jini://" + "waterloo");
-
             ServiceRegistrar sr = l.getRegistrar();
-
             Class c = Class.forName("net.jini.core.transaction.server.TransactionManager");
             Class[] classTemplate = {c};
-
             tm = (TransactionManager) sr.lookup(new ServiceTemplate(null, classTemplate, null));
-
         } catch (ClassNotFoundException | IOException e) {
             System.err.println("Error: " + e);
         }

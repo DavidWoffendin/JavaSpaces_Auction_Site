@@ -1,14 +1,15 @@
 package U1654949.Space_Auction_Items;
 
-import U1654949.User_Interface.Interface_Helpers.Common_Functions;
 import net.jini.core.entry.Entry;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Class that represents the lots within the auction system
  */
-public class U1654949_Lot implements Entry {
+public class DWLot implements Entry {
 
     public Integer id;
     public Double price;
@@ -16,20 +17,21 @@ public class U1654949_Lot implements Entry {
     public ArrayList<Integer> bids;
     public String name;
     public String description;
-    public U1654949_User user;
+    public DWUser user;
     public Boolean ended;
     public Boolean removed;
+    public Boolean boughtOutright;
 
     /**
      * empty constructor
      */
-    public U1654949_Lot() {
+    public DWLot() {
     }
 
     /**
      * @param id constructor just using lot id
      */
-    public U1654949_Lot(Integer id) {
+    public DWLot(Integer id) {
         this.id = id;
     }
 
@@ -43,7 +45,7 @@ public class U1654949_Lot implements Entry {
      * @param ended       Boolean tracking if the lot ended
      * @param removed     Boolean tracking if lot was removed early
      */
-    public U1654949_Lot(Integer id, U1654949_User user, ArrayList<Integer> bids, String name, Double price, Double buyNowPrice, String description, Boolean ended, Boolean removed) {
+    public DWLot(Integer id, DWUser user, ArrayList<Integer> bids, String name, Double price, Double buyNowPrice, String description, Boolean ended, Boolean removed, Boolean boughtOutright) {
         this.id = id;
         this.user = user;
         this.bids = bids;
@@ -53,14 +55,16 @@ public class U1654949_Lot implements Entry {
         this.description = description;
         this.ended = ended;
         this.removed = removed;
+        this.boughtOutright = boughtOutright;
     }
 
+    NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.UK);
 
     public Integer getId() {
         return id;
     }
 
-    public U1654949_Lot setId(Integer id) {
+    public DWLot setId(Integer id) {
         this.id = id;
         return this;
     }
@@ -69,7 +73,7 @@ public class U1654949_Lot implements Entry {
         return price;
     }
 
-    public U1654949_Lot setPrice(Double price) {
+    public DWLot setPrice(Double price) {
         this.price = price;
         return this;
     }
@@ -78,7 +82,7 @@ public class U1654949_Lot implements Entry {
         return buyNowPrice;
     }
 
-    public U1654949_Lot setBuyNowPrice(Double buyNowPrice) {
+    public DWLot setBuyNowPrice(Double buyNowPrice) {
         this.price = buyNowPrice;
         return this;
     }
@@ -90,7 +94,7 @@ public class U1654949_Lot implements Entry {
         return bids;
     }
 
-    public U1654949_Lot setBids(ArrayList<Integer> bids) {
+    public DWLot setBids(ArrayList<Integer> bids) {
         this.bids = bids;
         return this;
     }
@@ -99,7 +103,7 @@ public class U1654949_Lot implements Entry {
         return name;
     }
 
-    public U1654949_Lot setName(String name) {
+    public DWLot setName(String name) {
         this.name = name;
         return this;
     }
@@ -108,12 +112,12 @@ public class U1654949_Lot implements Entry {
         return description;
     }
 
-    public U1654949_Lot setDescription(String description) {
+    public DWLot setDescription(String description) {
         this.description = description;
         return this;
     }
 
-    public U1654949_User getUser() {
+    public DWUser getUser() {
         return user;
     }
 
@@ -121,7 +125,7 @@ public class U1654949_Lot implements Entry {
         return user.getId();
     }
 
-    public U1654949_Lot setUser(U1654949_User user) {
+    public DWLot setUser(DWUser user) {
         this.user = user;
         return this;
     }
@@ -130,7 +134,7 @@ public class U1654949_Lot implements Entry {
         return ended != null && ended;
     }
 
-    public U1654949_Lot setEnded(Boolean ended) {
+    public DWLot setEnded(Boolean ended) {
         this.ended = ended;
         return this;
     }
@@ -139,8 +143,17 @@ public class U1654949_Lot implements Entry {
         return removed != null && removed;
     }
 
-    public U1654949_Lot setRemoved(Boolean removed) {
+    public DWLot setRemoved(Boolean removed) {
         this.removed = removed;
+        return this;
+    }
+
+    public Boolean isBoughtOutright() {
+        return boughtOutright != null && boughtOutright;
+    }
+
+    public DWLot setBoughtOutright(Boolean boughtOutright) {
+        this.boughtOutright = boughtOutright;
         return this;
     }
 
@@ -161,10 +174,10 @@ public class U1654949_Lot implements Entry {
      */
     public Object[] asObjectArray() {
         return new Object[]{
-                id,
                 name,
                 user == null ? null : user.getId(),
-                Common_Functions.getDoubleAsCurrency(price),
+                nf.format(price),
+                nf.format(buyNowPrice),
                 isEnded() ? "Ended" : "Running"
         };
     }
