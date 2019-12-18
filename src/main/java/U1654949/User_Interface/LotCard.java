@@ -80,7 +80,7 @@ public class LotCard extends JPanel {
                 card.remove(LotCard.this);
             }
         });
-        infoPanel.add(back, BorderLayout.WEST);
+        infoPanel.add(back, BorderLayout.NORTH);
         placeBid = new JLabel("Place Bid");
         buyNow = new JLabel("Buy it now");
         acceptOrRemove = new JLabel("Accept Latest Bid");
@@ -89,7 +89,6 @@ public class LotCard extends JPanel {
         acceptButtonListener = new AcceptButtonListener(lot, price);
         removeButtonListener = new RemoveButtonListener(lot);
         buyItNowButtonListener = new BuyItNowButtonListener(lot);
-        JPanel eastPanel = new JPanel();
 
         if(!lot.isEnded()) {
             if (User.getCurrentUser().equals(lot.getUser())) {
@@ -99,17 +98,16 @@ public class LotCard extends JPanel {
                 } else {
                     acceptOrRemove.addMouseListener(acceptButtonListener);
                 }
-                infoPanel.add(acceptOrRemove, BorderLayout.EAST);
+                infoPanel.add(acceptOrRemove, BorderLayout.CENTER);
             } else {
                 placeBid.addMouseListener(new PlaceButtonListener(lot));
                 buyNow.addMouseListener(new BuyItNowButtonListener(lot));
-                eastPanel.add(placeBid);
-                eastPanel.add(buyNow);
-                infoPanel.add(eastPanel,BorderLayout.EAST);
+                infoPanel.add(placeBid, BorderLayout.CENTER);
+                infoPanel.add(buyNow,BorderLayout.SOUTH);
             }
         }
 
-        add(infoPanel, BorderLayout.SOUTH);
+        add(infoPanel, BorderLayout.NORTH);
         String[] labels = {"ID", "User ID", "Name", "Description"};
         JPanel lotDetails = new JPanel(new GridLayout(labels.length + 2, 2));
         lotDetails.setBorder(BorderFactory.createEmptyBorder(-8, 0, 10, 0));
@@ -148,13 +146,13 @@ public class LotCard extends JPanel {
         lotDetails.add(price);
         lotDetails.add(buyNowLabel);
         lotDetails.add(buyItNowPrice);
-        add(lotDetails);
+        add(lotDetails, BorderLayout.SOUTH);
         bidsList = new Default_Table(bids, new Vector<String>(){{
             add("Buyer ID");
             add("Bid Amount");
         }});
         JScrollPane itemListPanel = new JScrollPane(bidsList);
-        add(itemListPanel, BorderLayout.NORTH);
+        add(itemListPanel, BorderLayout.CENTER);
     }
 
     public static ArrayList<DWBid> getBidHistory(DWLot lot) {
@@ -244,10 +242,6 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent ev) {
             try {
                 final DWLotRemover remover = (DWLotRemover) javaSpace.read(new DWLotRemover(lot.getId()), null, 1500);
-
-                System.out.println(remover.isEnded());
-                System.out.println(remover.isRemoved());
-                System.out.println(remover.isBoughtOutright());
 
                 if(remover.isRemoved()){
                     JOptionPane.showMessageDialog(null, "This lot has been removed!");

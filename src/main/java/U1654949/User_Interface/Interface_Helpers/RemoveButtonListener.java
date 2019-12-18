@@ -28,7 +28,7 @@ public class RemoveButtonListener extends Listener {
         int result = JOptionPane.showConfirmDialog(null, modal, "Remove Lot?", JOptionPane.OK_CANCEL_OPTION);
         System.out.println("Remove");
         if (result == JOptionPane.OK_OPTION) {
-            lotRemove(false, true, true);
+            lotRemove(false, true, false);
         }
 
     }
