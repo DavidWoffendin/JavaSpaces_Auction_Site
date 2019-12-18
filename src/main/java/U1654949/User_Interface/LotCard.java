@@ -110,7 +110,7 @@ public class LotCard extends JPanel {
         add(infoPanel, BorderLayout.NORTH);
         String[] labels = {"ID", "User ID", "Name", "Description"};
         JPanel lotDetails = new JPanel(new GridLayout(labels.length + 2, 2));
-        lotDetails.setBorder(BorderFactory.createEmptyBorder(-8, 0, 10, 0));
+        lotDetails.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
 
         try {
             for (String label : labels) {
