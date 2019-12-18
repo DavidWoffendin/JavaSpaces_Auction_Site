@@ -4,6 +4,6 @@
     <option name="languageLevel" value="ES6" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" default="false" project-jdk-name="11.0.4" project-jdk-type="JavaSDK">
-    <output url="file://$PROJECT_DIR$/../Auctioneer/out" />
+    <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
