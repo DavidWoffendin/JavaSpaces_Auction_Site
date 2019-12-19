@@ -110,58 +110,7 @@ public class ListCard extends JPanel {
 
         addLotButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                resultTextOut.setText("");
-
-                String itemName = itemNameIn.getText();
-                String itemDescription = itemDescriptionIn.getText();
-                Number startingPrice = Double.parseDouble(startingPriceIn.getText());
-                Number buyNowPrice = Double.parseDouble(buyNowPriceIn.getText());
-                Double priceDouble = startingPrice == null ? 0 : startingPrice.doubleValue();
-                Double buyNowDouble = buyNowPrice == null ? 0 : buyNowPrice.doubleValue();
-
-
-                if(itemName.length() == 0 || itemDescription.length() == 0){
-                    resultTextOut.setText("Invalid lot details!");
-                    return;
-                }
-
-                if(startingPrice == null || priceDouble == 0){
-                    resultTextOut.setText("Invalid price!");
-                    return;
-                }
-
-                if(buyNowPrice == null || buyNowDouble == 0){
-                    resultTextOut.setText("Invalid buy it now price!");
-                    return;
-                }
-
-                Transaction transaction = null;
-                try {
-                    Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
-                    transaction = trc.transaction;
-                    DWAuctionStatusObject Counter = (DWAuctionStatusObject) auctionSpace.take(new DWAuctionStatusObject(), null, 1500);
-                    final int lotNumber = Counter.countLot();
-                    DWLot newLot = new DWLot(lotNumber, User.getCurrentUser(), null, itemName, priceDouble, buyNowDouble, itemDescription, false, false, false);
-                    auctionSpace.write(newLot, transaction, 3600000);
-                    auctionSpace.write(Counter, transaction, Lease.FOREVER);
-                    transaction.commit();
-                    itemNameIn.setText("");
-                    itemDescriptionIn.setText("");
-                    startingPriceIn.setText("");
-                    buyNowPriceIn.setText("");
-                    resultTextOut.setText("Added Lot: " + lotNumber + "!");
-
-                    lots.add(newLot);
-                } catch (RemoteException | LeaseDeniedException | TransactionException | InterruptedException | UnusableEntryException e) {
-                    System.err.println("Error: " + e);
-                    try {
-                        if(transaction != null){
-                            transaction.abort();
-                        }
-                    } catch (UnknownTransactionException | CannotAbortException | RemoteException ex) {
-                        System.err.println("Error: " + ex);
-                    }
-                }
+                createLot(resultTextOut, itemNameIn, itemDescriptionIn, startingPriceIn, buyNowPriceIn, lots);
             }
         });
 
@@ -175,6 +124,66 @@ public class ListCard extends JPanel {
             auctionSpace.notify(new DWLotRemover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void createLot(JTextField resultTextOut, JTextField itemNameIn, JTextField itemDescriptionIn, JTextField startingPriceIn, JTextField buyNowPriceIn, ArrayList<DWLot> lots) {
+        resultTextOut.setText("");
+
+        if(itemNameIn.getText().length() == 0 || itemDescriptionIn.getText().length() == 0){
+            resultTextOut.setText("Invalid lot details!");
+            return;
+        }
+
+        if(startingPriceIn.getText() == null){
+            resultTextOut.setText("Invalid price!");
+            return;
+        }
+
+        if(buyNowPriceIn.getText()  == null){
+            resultTextOut.setText("Invalid buy it now price!");
+            return;
+        }
+
+        try {
+            Double.parseDouble(startingPriceIn.getText());
+            Double.parseDouble(buyNowPriceIn.getText());
+        } catch (Exception e) {
+            resultTextOut.setText("Invalid  price!");
+            return;
+        }
+
+        String itemName = itemNameIn.getText();
+        String itemDescription = itemDescriptionIn.getText();
+        Double startingPrice = Double.parseDouble(startingPriceIn.getText());
+        Double buyNowPrice = Double.parseDouble(buyNowPriceIn.getText());
+
+        Transaction transaction = null;
+        try {
+            Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
+            transaction = trc.transaction;
+            DWAuctionStatusObject Counter = (DWAuctionStatusObject) auctionSpace.take(new DWAuctionStatusObject(), null, 1500);
+            final int lotNumber = Counter.countLot();
+            DWLot newLot = new DWLot(lotNumber, User.getCurrentUser(), null, itemName, startingPrice, buyNowPrice, itemDescription, false, false, false);
+            auctionSpace.write(newLot, transaction, 3600000);
+            auctionSpace.write(Counter, transaction, Lease.FOREVER);
+            transaction.commit();
+            itemNameIn.setText("");
+            itemDescriptionIn.setText("");
+            startingPriceIn.setText("");
+            buyNowPriceIn.setText("");
+            resultTextOut.setText("Added Lot: " + lotNumber + "!");
+
+            lots.add(newLot);
+        } catch (RemoteException | LeaseDeniedException | TransactionException | InterruptedException | UnusableEntryException e) {
+            System.err.println("Error: " + e);
+            try {
+                if(transaction != null){
+                    transaction.abort();
+                }
+            } catch (UnknownTransactionException | CannotAbortException | RemoteException ex) {
+                System.err.println("Error: " + ex);
+            }
         }
     }
 
