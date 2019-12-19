@@ -9,7 +9,7 @@ import java.util.Locale;
 /**
  * Class that represents the lots within the auction system
  */
-public class DWLot implements Entry {
+public class DIBWLot implements Entry {
 
     public Integer id;
     public Double price;
@@ -17,7 +17,7 @@ public class DWLot implements Entry {
     public ArrayList<Integer> bids;
     public String name;
     public String description;
-    public DWUser user;
+    public DIBWUser user;
     public Boolean ended;
     public Boolean removed;
     public Boolean boughtOutright;
@@ -25,13 +25,13 @@ public class DWLot implements Entry {
     /**
      * empty constructor
      */
-    public DWLot() {
+    public DIBWLot() {
     }
 
     /**
      * @param id constructor just using lot id
      */
-    public DWLot(Integer id) {
+    public DIBWLot(Integer id) {
         this.id = id;
     }
 
@@ -45,7 +45,7 @@ public class DWLot implements Entry {
      * @param ended       Boolean tracking if the lot ended
      * @param removed     Boolean tracking if lot was removed early
      */
-    public DWLot(Integer id, DWUser user, ArrayList<Integer> bids, String name, Double price, Double buyNowPrice, String description, Boolean ended, Boolean removed, Boolean boughtOutright) {
+    public DIBWLot(Integer id, DIBWUser user, ArrayList<Integer> bids, String name, Double price, Double buyNowPrice, String description, Boolean ended, Boolean removed, Boolean boughtOutright) {
         this.id = id;
         this.user = user;
         this.bids = bids;
@@ -64,7 +64,7 @@ public class DWLot implements Entry {
         return id;
     }
 
-    public DWLot setId(Integer id) {
+    public DIBWLot setId(Integer id) {
         this.id = id;
         return this;
     }
@@ -73,7 +73,7 @@ public class DWLot implements Entry {
         return price;
     }
 
-    public DWLot setPrice(Double price) {
+    public DIBWLot setPrice(Double price) {
         this.price = price;
         return this;
     }
@@ -82,7 +82,7 @@ public class DWLot implements Entry {
         return buyNowPrice;
     }
 
-    public DWLot setBuyNowPrice(Double buyNowPrice) {
+    public DIBWLot setBuyNowPrice(Double buyNowPrice) {
         this.price = buyNowPrice;
         return this;
     }
@@ -94,7 +94,7 @@ public class DWLot implements Entry {
         return bids;
     }
 
-    public DWLot setBids(ArrayList<Integer> bids) {
+    public DIBWLot setBids(ArrayList<Integer> bids) {
         this.bids = bids;
         return this;
     }
@@ -103,7 +103,7 @@ public class DWLot implements Entry {
         return name;
     }
 
-    public DWLot setName(String name) {
+    public DIBWLot setName(String name) {
         this.name = name;
         return this;
     }
@@ -112,12 +112,12 @@ public class DWLot implements Entry {
         return description;
     }
 
-    public DWLot setDescription(String description) {
+    public DIBWLot setDescription(String description) {
         this.description = description;
         return this;
     }
 
-    public DWUser getUser() {
+    public DIBWUser getUser() {
         return user;
     }
 
@@ -125,7 +125,7 @@ public class DWLot implements Entry {
         return user.getId();
     }
 
-    public DWLot setUser(DWUser user) {
+    public DIBWLot setUser(DIBWUser user) {
         this.user = user;
         return this;
     }
@@ -134,7 +134,7 @@ public class DWLot implements Entry {
         return ended != null && ended;
     }
 
-    public DWLot setEnded(Boolean ended) {
+    public DIBWLot setEnded(Boolean ended) {
         this.ended = ended;
         return this;
     }
@@ -143,7 +143,7 @@ public class DWLot implements Entry {
         return removed != null && removed;
     }
 
-    public DWLot setRemoved(Boolean removed) {
+    public DIBWLot setRemoved(Boolean removed) {
         this.removed = removed;
         return this;
     }
@@ -152,7 +152,14 @@ public class DWLot implements Entry {
         return boughtOutright != null && boughtOutright;
     }
 
-    public DWLot setBoughtOutright(Boolean boughtOutright) {
+    public DIBWLot setBoughtOutright(Boolean boughtOutright) {
+        this.boughtOutright = boughtOutright;
+        return this;
+    }
+
+    public DIBWLot setOverallRemoval(Boolean ended, Boolean removed, Boolean boughtOutright) {
+        this.ended = ended;
+        this.removed = removed;
         this.boughtOutright = boughtOutright;
         return this;
     }

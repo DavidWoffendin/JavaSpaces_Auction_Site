@@ -23,8 +23,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 import java.rmi.server.ExportException;
 import java.text.NumberFormat;
@@ -34,7 +32,7 @@ public class LotCard extends JPanel {
 
     private final JavaSpace javaSpace;
     private LotTable bidsList;
-    private DWLot lot;
+    private DIBWLot lot;
     private TransactionManager transactionManager;
 
     private final Vector<Vector<String>> bids;
@@ -48,21 +46,22 @@ public class LotCard extends JPanel {
     private JLabel priceLabel;
     private JLabel buyNowLabel;
     private final JPanel card;
+    private ActionListener remove;
 
     NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.UK);
 
-    public LotCard(final JPanel card, DWLot lotForCard) {
+    public LotCard(final JPanel card, DIBWLot lotForCard) {
         super();
         this.card = card;
         this.javaSpace = SpaceUtils.getSpace();
         this.transactionManager = SpaceUtils.getManager();
 
-        DWLot baseLot = lotForCard;
+        DIBWLot baseLot = lotForCard;
         setLayout(new BorderLayout());
 
         try {
-            DWLot templateLot = new DWLot(lotForCard.getId());
-            baseLot = (DWLot) javaSpace.read(templateLot, null, 1500);
+            DIBWLot templateLot = new DIBWLot(lotForCard.getId());
+            baseLot = (DIBWLot) javaSpace.read(templateLot, null, 1500);
         } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
             System.err.println("Error: " + e);
         }
@@ -74,8 +73,8 @@ public class LotCard extends JPanel {
             BidListener bidListener = new BidListener();
             LotListener endedListener = new LotListener();
 
-            DWBid bTemplate = new DWBid(null, null, lot.getId(), null);
-            DWLotRemover rTemplate = new DWLotRemover(lot.getId(), null, null, null);
+            DIBWBid bTemplate = new DIBWBid(null, null, lot.getId(), null);
+            DIBWLotRemove rTemplate = new DIBWLotRemove(lot.getId(), null, null, null, null);
 
             javaSpace.notify(bTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
             javaSpace.notify(rTemplate, null, endedListener.getListener(), Lease.FOREVER, null);
@@ -113,12 +112,13 @@ public class LotCard extends JPanel {
             if (User.getCurrentUser().equals(lot.getUser())) {
                 if(lot.getLastBid() == null){
                     end.setText("Remove Lot");
-                    end.addActionListener(new ActionListener() {
+                    remove = new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
                             removeLot();
                         }
-                    });
+                    };
+                    end.addActionListener(remove);
                 } else {
                     end.addActionListener(new ActionListener() {
                         @Override
@@ -162,16 +162,18 @@ public class LotCard extends JPanel {
                 try {
                     Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
                     transaction = trc.transaction;
-                    DWAuctionStatusObject bidCounter = (DWAuctionStatusObject) javaSpace.take(new DWAuctionStatusObject(), transaction, 1500);
-                    DWLot updatedLot = (DWLot) javaSpace.take(new DWLot(lot.getId()), transaction, 1500);
+                    DIBWAuctionStatusObject bidCounter = (DIBWAuctionStatusObject) javaSpace.take(new DIBWAuctionStatusObject(), transaction, 1500);
+                    DIBWLot updatedLot = (DIBWLot) javaSpace.take(new DIBWLot(lot.getId()), transaction, 1500);
                     int bidNumber = bidCounter.countBid();
                     updatedLot.getBids().add(bidNumber);
                     updatedLot.setPrice(bid);
-                    DWBid newBid = new DWBid(bidNumber, User.getCurrentUser(), lot.getId(), bid);
-                    javaSpace.write(new DWLotUpdater(lot.getId(), bid), transaction, 3000);
+
+                    DIBWBid newBid = new DIBWBid(bidNumber, User.getCurrentUser(), lot.getId(), bid);
+                    javaSpace.write(new DIBWLotUpdate(lot.getId(), bid), transaction, 3000);
                     javaSpace.write(updatedLot, transaction, 3600000);
                     javaSpace.write(newBid, transaction, 5000000);
                     javaSpace.write(bidCounter, transaction, Lease.FOREVER);
+
                     transaction.commit();
                     lot = updatedLot;
                 } catch (TransactionException | InterruptedException e) {
@@ -195,7 +197,7 @@ public class LotCard extends JPanel {
     private void buyLot() {
         int result = JOptionPane.showConfirmDialog(null, "Do you want to buy this lot?", "Buy It Now?", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            removeLot(false, false, true);
+            removeLot(null, false, false, true);
         }
     }
 
@@ -204,7 +206,9 @@ public class LotCard extends JPanel {
         modal.add(new JLabel("Confirm bid: " + price.getText() + "?"));
         int result = JOptionPane.showConfirmDialog(null, modal,"Accept Bid?", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            removeLot(true, false, false);
+            Vector<String> winningBid = bids.get(0);
+            String buyerName = winningBid.get(0);
+            removeLot(buyerName, true, false, false);
         }
     }
 
@@ -213,18 +217,18 @@ public class LotCard extends JPanel {
         modal.add(new JLabel("Are you sure you want to remove the lot?"));
         int result = JOptionPane.showConfirmDialog(null, modal, "Remove Lot?", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            removeLot(false, true, false);
+            removeLot(null, false, true, false);
         }
     }
 
-    private void removeLot(Boolean end, Boolean remove, Boolean bought) {
+    private void removeLot(String buyerName, Boolean end, Boolean remove, Boolean bought) {
         Transaction transaction = null;
         try {
             Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
             transaction = trc.transaction;
-            DWLot updatedLot = (DWLot) javaSpace.read(new DWLot(lot.getId()), transaction, 1500);
-            updatedLot.setBoughtOutright(true);
-            javaSpace.write(new DWLotRemover(lot.getId(), end, remove, bought), transaction, 3000);
+            DIBWLot updatedLot = (DIBWLot) javaSpace.read(new DIBWLot(lot.getId()), transaction, 1500);
+            updatedLot.setOverallRemoval(end, remove, bought);
+            javaSpace.write(new DIBWLotRemove(lot.getId(), buyerName, end, remove, bought), transaction, 3000);
             transaction.commit();
             lot = updatedLot;
         } catch (RemoteException | TransactionException | InterruptedException | UnusableEntryException | LeaseDeniedException e) {
@@ -297,38 +301,38 @@ public class LotCard extends JPanel {
         add(lotDetails, BorderLayout.SOUTH);
     }
 
-    public static ArrayList<DWBid> getBidHistory(DWLot lot) {
+    public static ArrayList<DIBWBid> getBidHistory(DIBWLot lot) {
         JavaSpace space = SpaceUtils.getSpace();
-        ArrayList<DWBid> bidHistory = new ArrayList<DWBid>();
+        ArrayList<DIBWBid> bidHistory = new ArrayList<DIBWBid>();
         try {
-            DWLot refreshedLot = (DWLot) space.read(new DWLot(lot.getId()), null, 1500);
+            DIBWLot refreshedLot = (DIBWLot) space.read(new DIBWLot(lot.getId()), null, 1500);
             ArrayList<Integer> bids = refreshedLot.getBids();
             if(bids.size() == 0){
                 return bidHistory;
             }
             for(Integer bidId : bids){
-                DWBid template = new DWBid(bidId, null, lot.getId(), null);
-                DWBid bidItem = ((DWBid) space.read(template, null, 1500));
+                DIBWBid template = new DIBWBid(bidId, null, lot.getId(), null);
+                DIBWBid bidItem = ((DIBWBid) space.read(template, null, 1500));
                 bidHistory.add(bidItem);
             }
         } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
             System.err.println("Error: " + e);
         }
-        Collections.sort(bidHistory, new Comparator<DWBid>() {
+        Collections.sort(bidHistory, new Comparator<DIBWBid>() {
             @Override
-            public int compare(DWBid bid1, DWBid bid2) {
+            public int compare(DIBWBid bid1, DIBWBid bid2) {
                 return bid2.getPrice().compareTo(bid1.getPrice());
             }
         });
         return bidHistory;
     }
 
-    public static Vector<Vector<String>> getVectorBidMatrix(DWLot lot){
+    public static Vector<Vector<String>> getVectorBidMatrix(DIBWLot lot){
         final NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.UK);
-        ArrayList<DWBid> bids = getBidHistory(lot);
+        ArrayList<DIBWBid> bids = getBidHistory(lot);
         Vector<Vector<String>> values = new Vector<Vector<String>>();
         for(int iY = 0; iY < bids.size(); iY++){
-            final DWBid bid = bids.get(iY);
+            final DIBWBid bid = bids.get(iY);
             values.add(iY, new Vector<String>(){{
                 add(bid.getUser().getId());
                 add(nf.format(bid.getPrice()));
@@ -342,14 +346,15 @@ public class LotCard extends JPanel {
         @Override
         public void notify(RemoteEvent ev) {
             try {
-                final DWLot latestLot = (DWLot) javaSpace.read(new DWLot(lot.getId()), null, 1500);
-                final DWBid latestBid = (DWBid) javaSpace.read(new DWBid(latestLot.getLastBid()), null, 1500);
+                final DIBWLot latestLot = (DIBWLot) javaSpace.read(new DIBWLot(lot.getId()), null, 1500);
+                final DIBWBid latestBid = (DIBWBid) javaSpace.read(new DIBWBid(latestLot.getLastBid()), null, 1500);
                 Vector<String> insertion = new Vector<String>(){{
                     add(latestBid.getUser().getId());
                     add(nf.format(latestBid.getPrice()));
                 }};
                 if(latestLot.getLastBid() != null && User.getCurrentUser().equals(lot.getUser())){
                     end.setText("Accept Latest Bid");
+                    end.removeActionListener(remove);
                     end.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
@@ -371,7 +376,7 @@ public class LotCard extends JPanel {
         @Override
         public void notify(RemoteEvent ev) {
             try {
-                final DWLotRemover remover = (DWLotRemover) javaSpace.read(new DWLotRemover(lot.getId()), null, 1500);
+                final DIBWLotRemove remover = (DIBWLotRemove) javaSpace.read(new DIBWLotRemove(lot.getId()), null, 1500);
 
                 if(remover.isRemoved()){
                     JOptionPane.showMessageDialog(null, "This lot has been removed!");

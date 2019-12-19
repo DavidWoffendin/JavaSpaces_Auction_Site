@@ -33,10 +33,10 @@ public class ListCard extends JPanel {
 
     private final JavaSpace auctionSpace;
     private final TransactionManager transactionManager;
-    private final ArrayList<DWLot> lots;
+    private final ArrayList<DIBWLot> lots;
     private final ListTable lotList;
 
-    public ListCard(final ArrayList<DWLot> lots, final JPanel cards){
+    public ListCard(final ArrayList<DIBWLot> lots, final JPanel cards){
         super(new BorderLayout());
 
         this.lots = lots;
@@ -118,15 +118,15 @@ public class ListCard extends JPanel {
         add(bidListingPanel, BorderLayout.SOUTH);
 
         try {
-            auctionSpace.notify(new DWLotUpdater(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
-            auctionSpace.notify(new DWAuctionStatusObject(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
-            auctionSpace.notify(new DWLotRemover(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new DIBWLotUpdate(), null, new LotChangeNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new DIBWAuctionStatusObject(), null, new NewLotNotifier().getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(new DIBWLotRemove(), null, new RemoveLotFromAuctionNotifier().getListener(), Lease.FOREVER, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void createLot(JTextField resultTextOut, JTextField itemNameIn, JTextField itemDescriptionIn, JTextField startingPriceIn, JTextField buyNowPriceIn, ArrayList<DWLot> lots) {
+    private void createLot(JTextField resultTextOut, JTextField itemNameIn, JTextField itemDescriptionIn, JTextField startingPriceIn, JTextField buyNowPriceIn, ArrayList<DIBWLot> lots) {
         resultTextOut.setText("");
 
         if(itemNameIn.getText().length() == 0 || itemDescriptionIn.getText().length() == 0){
@@ -161,9 +161,9 @@ public class ListCard extends JPanel {
         try {
             Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
             transaction = trc.transaction;
-            DWAuctionStatusObject Counter = (DWAuctionStatusObject) auctionSpace.take(new DWAuctionStatusObject(), null, 1500);
+            DIBWAuctionStatusObject Counter = (DIBWAuctionStatusObject) auctionSpace.take(new DIBWAuctionStatusObject(), null, 1500);
             final int lotNumber = Counter.countLot();
-            DWLot newLot = new DWLot(lotNumber, User.getCurrentUser(), null, itemName, startingPrice, buyNowPrice, itemDescription, false, false, false);
+            DIBWLot newLot = new DIBWLot(lotNumber, User.getCurrentUser(), null, itemName, startingPrice, buyNowPrice, itemDescription, false, false, false);
             auctionSpace.write(newLot, transaction, 3600000);
             auctionSpace.write(Counter, transaction, Lease.FOREVER);
             transaction.commit();
@@ -196,14 +196,15 @@ public class ListCard extends JPanel {
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = getTableModel();
             try {
-                DWAuctionStatusObject Counter = (DWAuctionStatusObject) auctionSpace.read(new DWAuctionStatusObject(), null, 1500);
-                DWLot latestLot = (DWLot) auctionSpace.read(new DWLot(Counter.getLotCounter()), null, 1500);
+                DIBWAuctionStatusObject Counter = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
+                DIBWLot latestLot = (DIBWLot) auctionSpace.read(new DIBWLot(Counter.getLotCounter()), null, 1500);
                 Object[] insertion = latestLot.asObjectArray();
 
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
                     if (lots.get(i).getId().intValue() == latestLot.getId().intValue()) {
                         currentIndex = i;
+
                         break;
                     }
                 }
@@ -222,7 +223,7 @@ public class ListCard extends JPanel {
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = getTableModel();
             try {
-                DWLotUpdater lotChange = (DWLotUpdater) auctionSpace.read(new DWLotUpdater(), null, 1500);
+                DIBWLotUpdate lotChange = (DIBWLotUpdate) auctionSpace.read(new DIBWLotUpdate(), null, 1500);
                 int currentIndex = -1;
                 for(int i = 0, j = lots.size(); i < j; i++){
                     if (lots.get(i).getId().equals(lotChange.getLotId())) {
@@ -233,11 +234,10 @@ public class ListCard extends JPanel {
                 if(currentIndex == -1){
                     return;
                 }
-                DWLot lot = lots.get(currentIndex);
+                DIBWLot lot = lots.get(currentIndex);
                 lot.setPrice(lotChange.getLotPrice());
-                Object[] insertion = lot.asObjectArray();
-                lots.set(currentIndex, lot);
-                model.setValueAt(insertion[3], currentIndex, 3);
+                model.removeRow(currentIndex);
+                model.addRow(lot.asObjectArray());
             } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
                 System.err.println("Error: " + e);
             }
@@ -251,7 +251,7 @@ public class ListCard extends JPanel {
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = getTableModel();
             try {
-                DWLotRemover remover = (DWLotRemover) auctionSpace.read(new DWLotRemover(), null, 1500);
+                DIBWLotRemove remover = (DIBWLotRemove) auctionSpace.read(new DIBWLotRemove(), null, 1500);
 
                 int currentIndex = 0;
                 for (int i = 0, j = lots.size(); i < j; i++){
@@ -262,7 +262,7 @@ public class ListCard extends JPanel {
                 }
 
                 if(remover.isEnded()){
-                    DWLot lot = lots.get(currentIndex);
+                    DIBWLot lot = lots.get(currentIndex);
                     lot.setEnded(true);
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 4);
@@ -272,7 +272,7 @@ public class ListCard extends JPanel {
                 }
 
                 if(remover.isBoughtOutright()){
-                    DWLot lot = lots.get(currentIndex);
+                    DIBWLot lot = lots.get(currentIndex);
                     lot.setBoughtOutright(true);
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 4);
@@ -286,11 +286,11 @@ public class ListCard extends JPanel {
                     model.removeRow(currentIndex);
                 }
 
-                auctionSpace.takeIfExists(new DWLot(remover.getId()), null, 1000);
+                auctionSpace.takeIfExists(new DIBWLot(remover.getId()), null, 1000);
 
                 Object o;
                 do {
-                    o = auctionSpace.takeIfExists(new DWBid(remover.getId()), null, 1000);
+                    o = auctionSpace.takeIfExists(new DIBWBid(remover.getId()), null, 1000);
                 } while(o != null);
             } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
                 System.err.println("Error: " + e);

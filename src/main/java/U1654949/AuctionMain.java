@@ -1,7 +1,7 @@
 package U1654949;
 
-import U1654949.spaceauctionitems.DWAuctionStatusObject;
-import U1654949.spaceauctionitems.DWLot;
+import U1654949.spaceauctionitems.DIBWAuctionStatusObject;
+import U1654949.spaceauctionitems.DIBWLot;
 import U1654949.userinterfacecards.ListCard;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class AuctionMain extends JFrame {
 
-    private final ArrayList<DWLot> lots = new ArrayList<>();
+    private final ArrayList<DIBWLot> lots = new ArrayList<>();
 
     private static JavaSpace auctionSpace;
 
@@ -39,11 +39,11 @@ public class AuctionMain extends JFrame {
             public void run() {
                 DefaultTableModel model = listCard.getTableModel();
                 try {
-                    DWAuctionStatusObject lotStatus = (DWAuctionStatusObject) auctionSpace.read(new DWAuctionStatusObject(), null, 1500);
+                    DIBWAuctionStatusObject lotStatus = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
                     int i = 0;
                     while (i <= lotStatus.getLotCounter()) {
-                        DWLot template = new DWLot(i++ + 1, null, null, null, null, null, null, false, false, false);
-                        DWLot nextLot = (DWLot) auctionSpace.readIfExists(template, null, 1000);
+                        DIBWLot template = new DIBWLot(i++ + 1, null, null, null, null, null, null, false, false, false);
+                        DIBWLot nextLot = (DIBWLot) auctionSpace.readIfExists(template, null, 1000);
                         if (nextLot != null) {
                             lots.add(nextLot);
                             model.addRow(nextLot.asObjectArray());
@@ -95,8 +95,8 @@ public class AuctionMain extends JFrame {
             System.exit(1);
         }
         try {
-            if(auctionSpace.read(new DWAuctionStatusObject(), null, 1000) == null){
-                auctionSpace.write(new DWAuctionStatusObject(0, 0), null, Lease.FOREVER);
+            if(auctionSpace.read(new DIBWAuctionStatusObject(), null, 1000) == null){
+                auctionSpace.write(new DIBWAuctionStatusObject(0, 0), null, Lease.FOREVER);
             }
         } catch (UnusableEntryException | TransactionException | RemoteException | InterruptedException e) {
             System.err.println("Error: " + e);

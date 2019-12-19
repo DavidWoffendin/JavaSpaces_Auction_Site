@@ -5,22 +5,22 @@ import net.jini.core.entry.Entry;
 /**
  * JavaSpace item used to store bids for a lot
  */
-public class DWBid implements Entry {
+public class DIBWBid implements Entry {
 
     public Integer bidId;
     public Double price;
     public Integer itemId;
-    public DWUser user;
+    public DIBWUser user;
 
     /**
      * empty constructor
      */
-    public DWBid() {}
+    public DIBWBid() {}
 
     /**
      * @param bidId constructor which requires bidId
      */
-    public DWBid(Integer bidId) {
+    public DIBWBid(Integer bidId) {
         this.bidId = bidId;
     }
 
@@ -30,7 +30,7 @@ public class DWBid implements Entry {
      * @param itemId the itemID that the bid should belong to
      * @param user the user who made the bid
      */
-    public DWBid(Integer bidId, DWUser user, Integer itemId, Double price) {
+    public DIBWBid(Integer bidId, DIBWUser user, Integer itemId, Double price) {
         this.bidId = bidId;
         this.user = user;
         this.itemId = itemId;
@@ -42,16 +42,16 @@ public class DWBid implements Entry {
         return bidId;
     }
 
-    public DWBid setBidId(Integer bidId) {
+    public DIBWBid setBidId(Integer bidId) {
         this.bidId = bidId;
         return this;
     }
 
-    public DWUser getUser() {
+    public DIBWUser getUser() {
         return user;
     }
 
-    public DWBid setUser(DWUser user) {
+    public DIBWBid setUser(DIBWUser user) {
         this.user = user;
         return this;
     }
@@ -60,7 +60,7 @@ public class DWBid implements Entry {
         return itemId;
     }
 
-    public DWBid setItemId(Integer itemId) {
+    public DIBWBid setItemId(Integer itemId) {
         this.itemId = itemId;
         return this;
     }
@@ -69,7 +69,7 @@ public class DWBid implements Entry {
         return price;
     }
 
-    public DWBid setPrice(Double price) {
+    public DIBWBid setPrice(Double price) {
         this.price = price;
         return this;
     }
