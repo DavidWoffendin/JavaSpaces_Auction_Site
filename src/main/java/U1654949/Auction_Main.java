@@ -2,7 +2,7 @@ package U1654949;
 
 import U1654949.Space_Auction_Items.DWAuctionStatusObject;
 import U1654949.Space_Auction_Items.DWLot;
-import U1654949.User_Interface.ListCard;
+import U1654949.UserInterfaceCards.ListCard;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.TransactionException;

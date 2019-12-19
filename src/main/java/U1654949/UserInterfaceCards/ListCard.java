@@ -1,17 +1,21 @@
-package U1654949.User_Interface;
+package U1654949.UserInterfaceCards;
 
 import U1654949.Space_Auction_Items.*;
 import U1654949.Space_Utils;
 import U1654949.User;
-import U1654949.User_Interface.Defaults.Default_Table;
-import U1654949.User_Interface.Interface_Helpers.Notifier;
 
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.event.RemoteEvent;
+import net.jini.core.event.RemoteEventListener;
+import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.transaction.*;
 import net.jini.core.transaction.server.TransactionManager;
+import net.jini.export.Exporter;
+import net.jini.jeri.BasicILFactory;
+import net.jini.jeri.BasicJeriExporter;
+import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.space.JavaSpace;
 
 import javax.swing.*;
@@ -22,14 +26,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
+import java.rmi.server.ExportException;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class ListCard extends JPanel {
 
     private final JavaSpace auctionSpace;
     private final TransactionManager transactionManager;
     private final ArrayList<DWLot> lots;
-    private final Default_Table lotList;
+    private final ListTable lotList;
 
     public ListCard(final ArrayList<DWLot> lots, final JPanel cards){
         super(new BorderLayout());
@@ -64,7 +70,7 @@ public class ListCard extends JPanel {
 
         add(inputPanel, BorderLayout.CENTER);
 
-        lotList = new Default_Table(new String[0][6], new String[] {
+        lotList = new ListTable(new String[0][6], new String[]{
                 "Item Name", "Seller ID", "Current Price", "Buy It Now Price", "Status"
         });
 
@@ -281,6 +287,58 @@ public class ListCard extends JPanel {
             } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
                 System.err.println("Error: " + e);
             }
+        }
+
+    }
+
+    public static class Notifier implements RemoteEventListener {
+
+        Exporter remoteExporter;
+
+        private RemoteEventListener listener;
+
+        Notifier() {
+            try{
+                remoteExporter =
+                        new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
+                                new BasicILFactory(), false, true);
+                listener = (RemoteEventListener) remoteExporter.export(this);
+            } catch (ExportException e) {
+                System.err.println("Error: " + e);
+            }
+        }
+
+        RemoteEventListener getListener() {
+            return listener;
+        }
+
+        public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
+            super.notify();
+        }
+    }
+
+    public static class ListTable extends JTable {
+
+        ListTable(Object[][] data, Object[] columns){
+            setModel(new FixedListTableModel(data, columns));
+        }
+
+        private static class FixedListTableModel extends DefaultTableModel {
+
+            FixedListTableModel(Object[][] data, Object[] columns){
+                super(data, columns);
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+
+            @Override
+            public Class getColumnClass(int column) {
+                return String.class;
+            }
+
         }
 
     }
