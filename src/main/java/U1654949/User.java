@@ -1,6 +1,6 @@
 package U1654949;
 
-import U1654949.Space_Auction_Items.DWUser;
+import U1654949.spaceauctionitems.DWUser;
 
 /**
  * Simple class used to extend the User space object for easier use within the local auction room

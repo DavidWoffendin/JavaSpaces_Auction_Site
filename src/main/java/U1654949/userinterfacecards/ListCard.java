@@ -1,7 +1,7 @@
-package U1654949.UserInterfaceCards;
+package U1654949.userinterfacecards;
 
-import U1654949.Space_Auction_Items.*;
-import U1654949.Space_Utils;
+import U1654949.spaceauctionitems.*;
+import U1654949.SpaceUtils;
 import U1654949.User;
 
 import net.jini.core.entry.UnusableEntryException;
@@ -28,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 import java.rmi.server.ExportException;
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class ListCard extends JPanel {
 
@@ -41,8 +40,8 @@ public class ListCard extends JPanel {
         super(new BorderLayout());
 
         this.lots = lots;
-        this.transactionManager = Space_Utils.getManager();
-        this.auctionSpace = Space_Utils.getSpace();
+        this.transactionManager = SpaceUtils.getManager();
+        this.auctionSpace = SpaceUtils.getSpace();
 
         JPanel inputPanel = new JPanel(new GridLayout(5, 2));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

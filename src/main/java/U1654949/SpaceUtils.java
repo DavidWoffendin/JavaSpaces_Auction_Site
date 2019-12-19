@@ -15,7 +15,7 @@ import java.io.IOException;
  *
  *  This Class has a small amount of code cleanup and has my preferred was of handling errors implemented.
  */
-public class Space_Utils {
+public class SpaceUtils {
 
     /**
      * @return Returns the JavaSpace object

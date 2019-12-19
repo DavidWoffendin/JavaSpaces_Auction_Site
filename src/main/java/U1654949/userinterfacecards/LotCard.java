@@ -1,7 +1,7 @@
-package U1654949.UserInterfaceCards;
+package U1654949.userinterfacecards;
 
-import U1654949.Space_Auction_Items.*;
-import U1654949.Space_Utils;
+import U1654949.spaceauctionitems.*;
+import U1654949.SpaceUtils;
 import U1654949.User;
 
 import net.jini.core.entry.UnusableEntryException;
@@ -21,6 +21,8 @@ import net.jini.space.JavaSpace;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
@@ -32,26 +34,29 @@ public class LotCard extends JPanel {
 
     private final JavaSpace javaSpace;
     private LotTable bidsList;
-    private final DWLot lot;
+    private DWLot lot;
+    private TransactionManager transactionManager;
+
     private final Vector<Vector<String>> bids;
-    private final JLabel acceptOrRemove;
-    private final JLabel price;
-    private final JLabel buyItNowPrice;
+
+    private JButton end;
+    private JButton placeBid;
+    private JButton buyNow;
+
+    private JLabel price;
+    private JLabel buyItNowPrice;
     private JLabel priceLabel;
     private JLabel buyNowLabel;
-    private final JLabel placeBid;
-    private final JLabel buyNow;
     private final JPanel card;
-    private final AcceptButtonListener acceptButtonListener;
-    private final RemoveButtonListener removeButtonListener;
-    private final BuyItNowButtonListener buyItNowButtonListener;
 
     NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.UK);
 
     public LotCard(final JPanel card, DWLot lotForCard) {
         super();
         this.card = card;
-        this.javaSpace = Space_Utils.getSpace();
+        this.javaSpace = SpaceUtils.getSpace();
+        this.transactionManager = SpaceUtils.getManager();
+
         DWLot baseLot = lotForCard;
         setLayout(new BorderLayout());
 
@@ -81,43 +86,157 @@ public class LotCard extends JPanel {
 
         JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
-        JLabel back = new JLabel("Back");
-        back.addMouseListener(new MouseAdapter() {
+
+        cardButtonsCreator(infoPanel);
+        bidTableGetter(infoPanel);
+        lotDetailsGetter();
+    }
+
+    private void cardButtonsCreator(JPanel infoPanel) {
+        JButton back = new JButton("Back");
+        back.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent event) {
+            public void actionPerformed(ActionEvent actionEvent) {
                 card.remove(LotCard.this);
             }
         });
         infoPanel.add(back, BorderLayout.NORTH);
-        placeBid = new JLabel("Place Bid");
-        buyNow = new JLabel("Buy it now");
-        acceptOrRemove = new JLabel("Accept Latest Bid");
+
+        placeBid = new JButton("Place Bid");
+        buyNow = new JButton("Buy it now");
+        end = new JButton("Accept Latest Bid");
+
         price = new JLabel();
         buyItNowPrice = new JLabel();
-        acceptButtonListener = new AcceptButtonListener(lot, price);
-        removeButtonListener = new RemoveButtonListener(lot);
-        buyItNowButtonListener = new BuyItNowButtonListener(lot);
 
         if(!lot.isEnded()) {
             if (User.getCurrentUser().equals(lot.getUser())) {
                 if(lot.getLastBid() == null){
-                    acceptOrRemove.setText("Remove Lot");
-                    acceptOrRemove.addMouseListener(removeButtonListener);
+                    end.setText("Remove Lot");
+                    end.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            removeLot();
+                        }
+                    });
                 } else {
-                    acceptOrRemove.addMouseListener(acceptButtonListener);
+                    end.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            endLot();
+                        }
+                    });
                 }
-                infoPanel.add(acceptOrRemove, BorderLayout.CENTER);
+                infoPanel.add(end, BorderLayout.CENTER);
             } else {
-                placeBid.addMouseListener(new PlaceButtonListener(lot));
-                buyNow.addMouseListener(new BuyItNowButtonListener(lot));
+
+                placeBid.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        addBid();
+                    }
+                });
+                buyNow.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        buyLot();
+                    }
+                });
                 infoPanel.add(placeBid, BorderLayout.CENTER);
                 infoPanel.add(buyNow,BorderLayout.SOUTH);
             }
         }
+    }
 
-        bidTableGetter(infoPanel);
+    private void addBid() {
+        JPanel modal = new JPanel(new GridLayout(2, 2));
+        JTextField bidEntry = new JTextField();
+        modal.add(new JLabel("Bid Amount: "));
+        modal.add(bidEntry);
+        int result = JOptionPane.showConfirmDialog(null, modal,"Please enter your bid details:", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            Double bid;
+            String bidString = bidEntry.getText();
+            if (bidString.matches("(?=.)^\\$?(([1-9][0-9]{0,2}(,[0-9]{3})*)|[0-9]+)?(\\.[0-9]{1,2})?$") && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()) {
+                Transaction transaction = null;
+                try {
+                    Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
+                    transaction = trc.transaction;
+                    DWAuctionStatusObject bidCounter = (DWAuctionStatusObject) javaSpace.take(new DWAuctionStatusObject(), transaction, 1500);
+                    DWLot updatedLot = (DWLot) javaSpace.take(new DWLot(lot.getId()), transaction, 1500);
+                    int bidNumber = bidCounter.countBid();
+                    updatedLot.getBids().add(bidNumber);
+                    updatedLot.setPrice(bid);
+                    DWBid newBid = new DWBid(bidNumber, User.getCurrentUser(), lot.getId(), bid);
+                    javaSpace.write(new DWLotUpdater(lot.getId(), bid), transaction, 3000);
+                    javaSpace.write(updatedLot, transaction, 3600000);
+                    javaSpace.write(newBid, transaction, 5000000);
+                    javaSpace.write(bidCounter, transaction, Lease.FOREVER);
+                    transaction.commit();
+                    lot = updatedLot;
+                } catch (TransactionException | InterruptedException e) {
+                    e.printStackTrace();
+                } catch (RemoteException | LeaseDeniedException | UnusableEntryException e) {
+                    System.err.println("Error: " + e);
+                    try {
+                        if (transaction != null) {
+                            transaction.abort();
+                        }
+                    } catch (RemoteException | CannotAbortException | UnknownTransactionException ex) {
+                        System.err.println("Error: " + ex);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid bid entered!");
+            }
+        }
+    }
 
-        lotDetailsGetter();
+    private void buyLot() {
+        int result = JOptionPane.showConfirmDialog(null, "Do you want to buy this lot?", "Buy It Now?", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            removeLot(false, false, true);
+        }
+    }
+
+    private void endLot() {
+        JPanel modal = new JPanel();
+        modal.add(new JLabel("Confirm bid: " + price.getText() + "?"));
+        int result = JOptionPane.showConfirmDialog(null, modal,"Accept Bid?", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            removeLot(true, false, false);
+        }
+    }
+
+    private void removeLot() {
+        JPanel modal = new JPanel();
+        modal.add(new JLabel("Are you sure you want to remove the lot?"));
+        int result = JOptionPane.showConfirmDialog(null, modal, "Remove Lot?", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            removeLot(false, true, false);
+        }
+    }
+
+    private void removeLot(Boolean end, Boolean remove, Boolean bought) {
+        Transaction transaction = null;
+        try {
+            Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
+            transaction = trc.transaction;
+            DWLot updatedLot = (DWLot) javaSpace.read(new DWLot(lot.getId()), transaction, 1500);
+            updatedLot.setBoughtOutright(true);
+            javaSpace.write(new DWLotRemover(lot.getId(), end, remove, bought), transaction, 3000);
+            transaction.commit();
+            lot = updatedLot;
+        } catch (RemoteException | TransactionException | InterruptedException | UnusableEntryException | LeaseDeniedException e) {
+            System.err.println("Error: " + e);
+            try {
+                if (transaction != null) {
+                    transaction.abort();
+                }
+            } catch (RemoteException | CannotAbortException | UnknownTransactionException ex) {
+                System.err.println("Error: " + ex);
+            }
+        }
     }
 
     private void bidTableGetter(JPanel infoPanel) {
@@ -179,7 +298,7 @@ public class LotCard extends JPanel {
     }
 
     public static ArrayList<DWBid> getBidHistory(DWLot lot) {
-        JavaSpace space = Space_Utils.getSpace();
+        JavaSpace space = SpaceUtils.getSpace();
         ArrayList<DWBid> bidHistory = new ArrayList<DWBid>();
         try {
             DWLot refreshedLot = (DWLot) space.read(new DWLot(lot.getId()), null, 1500);
@@ -230,9 +349,13 @@ public class LotCard extends JPanel {
                     add(nf.format(latestBid.getPrice()));
                 }};
                 if(latestLot.getLastBid() != null && User.getCurrentUser().equals(lot.getUser())){
-                    acceptOrRemove.setText("Accept Latest Bid");
-                    acceptOrRemove.addMouseListener(acceptButtonListener);
-                    acceptOrRemove.removeMouseListener(removeButtonListener);
+                    end.setText("Accept Latest Bid");
+                    end.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            endLot();
+                        }
+                    });
                 }
                 bids.add(0, insertion);
                 bidsList.revalidate();
@@ -259,7 +382,7 @@ public class LotCard extends JPanel {
                     Vector<String> winningBid = bids.get(0);
                     String winningId = winningBid.get(0);
                     String winningPrice = winningBid.get(1);
-                    acceptOrRemove.setVisible(false);
+                    end.setVisible(false);
                     placeBid.setVisible(false);
                     buyNow.setVisible(false);
                     priceLabel.setText("Won by " + winningId + " -");
@@ -268,7 +391,7 @@ public class LotCard extends JPanel {
                 }
 
                 if(remover.isBoughtOutright()){
-                    acceptOrRemove.setVisible(false);
+                    end.setVisible(false);
                     placeBid.setVisible(false);
                     buyNow.setVisible(false);
                     priceLabel.setText("Lot has been Bought");
@@ -307,156 +430,6 @@ public class LotCard extends JPanel {
         public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
             super.notify();
         }
-    }
-
-    public class AcceptButtonListener extends Listener {
-
-        private JLabel price;
-
-        public AcceptButtonListener(DWLot lot, JLabel price) {
-            super(lot);
-            this.price = price;
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent event) {
-            JPanel modal = new JPanel();
-            modal.add(new JLabel("Confirm bid: " + price.getText() + "?"));
-            int result = JOptionPane.showConfirmDialog(null, modal,"Accept Bid?", JOptionPane.OK_CANCEL_OPTION);
-            if (result == JOptionPane.OK_OPTION) {
-                lotRemove(true, false, false);
-            }
-        }
-    }
-
-    public class BuyItNowButtonListener extends Listener {
-
-        public BuyItNowButtonListener(DWLot lot) {
-            super(lot);
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent event) {
-            int result = JOptionPane.showConfirmDialog(null, "Do you want to buy this lot?", "Buy It Now?", JOptionPane.OK_CANCEL_OPTION);
-            if (result == JOptionPane.OK_OPTION) {
-                lotRemove(false, false, true);
-            }
-        }
-    }
-
-    public class RemoveButtonListener extends Listener {
-
-        public RemoveButtonListener(DWLot lot) {
-            super(lot);
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent event) {
-            JPanel modal = new JPanel();
-            modal.add(new JLabel("Are you sure you want to remove the lot?"));
-            int result = JOptionPane.showConfirmDialog(null, modal, "Remove Lot?", JOptionPane.OK_CANCEL_OPTION);
-            if (result == JOptionPane.OK_OPTION) {
-                lotRemove(false, true, false);
-            }
-        }
-    }
-
-    public class PlaceButtonListener extends MouseAdapter {
-
-        private DWLot lot;
-        private JavaSpace javaSpace;
-        private TransactionManager transactionManager;
-
-
-        /**
-         * @param lot
-         */
-        public PlaceButtonListener(DWLot lot) {
-            this.lot = lot;
-            this.javaSpace = U1654949.Space_Utils.getSpace();
-            this.transactionManager = U1654949.Space_Utils.getManager();
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent event) {
-            JPanel modal = new JPanel(new GridLayout(2, 2));
-            JTextField bidEntry = new JTextField();
-            modal.add(new JLabel("Bid Amount: "));
-            modal.add(bidEntry);
-            int result = JOptionPane.showConfirmDialog(null, modal,"Please enter your bid details:", JOptionPane.OK_CANCEL_OPTION);
-            if (result == JOptionPane.OK_OPTION) {
-                Double bid;
-                String bidString = bidEntry.getText();
-                if (bidString.matches("(?=.)^\\$?(([1-9][0-9]{0,2}(,[0-9]{3})*)|[0-9]+)?(\\.[0-9]{1,2})?$") && (bid = Double.parseDouble(bidString)) > 0 && bid > lot.getPrice()) {
-                    Transaction transaction = null;
-                    try {
-                        Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
-                        transaction = trc.transaction;
-                        DWAuctionStatusObject bidCounter = (DWAuctionStatusObject) javaSpace.take(new DWAuctionStatusObject(), transaction, 1500);
-                        DWLot updatedLot = (DWLot) javaSpace.take(new DWLot(lot.getId()), transaction, 1500);
-                        int bidNumber = bidCounter.countBid();
-                        updatedLot.getBids().add(bidNumber);
-                        updatedLot.setPrice(bid);
-                        DWBid newBid = new DWBid(bidNumber, User.getCurrentUser(), lot.getId(), bid);
-                        javaSpace.write(new DWLotUpdater(lot.getId(), bid), transaction, 3000);
-                        javaSpace.write(updatedLot, transaction, 3600000);
-                        javaSpace.write(newBid, transaction, 5000000);
-                        javaSpace.write(bidCounter, transaction, Lease.FOREVER);
-                        transaction.commit();
-                        lot = updatedLot;
-                    } catch (TransactionException | InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (RemoteException | LeaseDeniedException | UnusableEntryException e) {
-                        System.err.println("Error: " + e);
-                        try {
-                            if (transaction != null) {
-                                transaction.abort();
-                            }
-                        } catch (RemoteException | CannotAbortException | UnknownTransactionException ex) {
-                            System.err.println("Error: " + ex);
-                        }
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Invalid bid entered!");
-                }
-            }
-        }
-    }
-
-    public class Listener extends MouseAdapter {
-
-        private DWLot lot;
-        private JavaSpace javaSpace;
-        private TransactionManager transactionManager;
-
-        public Listener(DWLot lot) {
-            this.lot = lot;
-            this.javaSpace = U1654949.Space_Utils.getSpace();
-            this.transactionManager = U1654949.Space_Utils.getManager();
-        }
-
-        public void lotRemove(Boolean end, Boolean remove, Boolean bought) {
-            Transaction transaction = null;
-            try {
-                Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
-                transaction = trc.transaction;
-                DWLot updatedLot = (DWLot) javaSpace.read(new DWLot(lot.getId()), transaction, 1500);
-                updatedLot.setBoughtOutright(true);
-                javaSpace.write(new DWLotRemover(lot.getId(), end, remove, bought), transaction, 3000);
-                transaction.commit();
-                lot = updatedLot;
-            } catch (RemoteException | TransactionException | InterruptedException | UnusableEntryException | LeaseDeniedException e) {
-                System.err.println("Error: " + e);
-                try {
-                    if (transaction != null) {
-                        transaction.abort();
-                    }
-                } catch (RemoteException | CannotAbortException | UnknownTransactionException ex) {
-                    System.err.println("Error: " + ex);
-                }
-            }
-        }
-
     }
 
     public static class LotTable extends JTable {

@@ -1,8 +1,8 @@
 package U1654949;
 
-import U1654949.Space_Auction_Items.DWAuctionStatusObject;
-import U1654949.Space_Auction_Items.DWLot;
-import U1654949.UserInterfaceCards.ListCard;
+import U1654949.spaceauctionitems.DWAuctionStatusObject;
+import U1654949.spaceauctionitems.DWLot;
+import U1654949.userinterfacecards.ListCard;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.TransactionException;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 /**
  * Main class designed to run the software package
  */
-public class Auction_Main extends JFrame {
+public class AuctionMain extends JFrame {
 
     private final ArrayList<DWLot> lots = new ArrayList<>();
 
@@ -28,7 +28,7 @@ public class Auction_Main extends JFrame {
     /**
      * Auction Room method
      */
-    public Auction_Main() {
+    public AuctionMain() {
 
         Space_Setup();
 
@@ -65,7 +65,7 @@ public class Auction_Main extends JFrame {
         String id = JOptionPane.showInputDialog(null, " Enter your username: ", null);
         if (id == null || id.length() == 0) throw new RuntimeException("No username provided");
         User.setCurrentUser(id);
-        new Auction_Main();
+        new AuctionMain();
     }
 
     private ListCard Interface_Starter() {
@@ -89,7 +89,7 @@ public class Auction_Main extends JFrame {
     }
 
     private void Space_Setup() {
-        auctionSpace = Space_Utils.getSpace();
+        auctionSpace = SpaceUtils.getSpace();
         if (auctionSpace == null) {
             System.err.println("Failed to find the JavaSpace, please try again");
             System.exit(1);
