@@ -184,6 +184,7 @@ public class ListCard extends JPanel {
                 System.err.println("Error: " + ex);
             }
         }
+
     }
 
     public DefaultTableModel getTableModel(){
@@ -266,7 +267,7 @@ public class ListCard extends JPanel {
                     lot.setEnded(true);
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 4);
-                    if(User.getCurrentUser().equals(lot.getUser())){
+                    if(User.getCurrentUser().getId().equals(remover.getBuyerName())){
                         JOptionPane.showMessageDialog(null, "You just won " + lot.getName() + "!");
                     }
                 }

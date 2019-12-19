@@ -34,26 +34,21 @@ public class AuctionMain extends JFrame {
 
         final ListCard listCard = Interface_Starter();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DefaultTableModel model = listCard.getTableModel();
-                try {
-                    DIBWAuctionStatusObject lotStatus = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
-                    int i = 0;
-                    while (i <= lotStatus.getLotCounter()) {
-                        DIBWLot template = new DIBWLot(i++ + 1, null, null, null, null, null, null, false, false, false);
-                        DIBWLot nextLot = (DIBWLot) auctionSpace.readIfExists(template, null, 1000);
-                        if (nextLot != null) {
-                            lots.add(nextLot);
-                            model.addRow(nextLot.asObjectArray());
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        DefaultTableModel model = listCard.getTableModel();
+        try {
+            DIBWAuctionStatusObject lotStatus = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
+            int i = 0;
+            while (i <= lotStatus.getLotCounter()) {
+                DIBWLot template = new DIBWLot(i++ + 1, null, null, null, null, null, null, false, false, false);
+                DIBWLot nextLot = (DIBWLot) auctionSpace.readIfExists(template, null, 1000);
+                if (nextLot != null) {
+                    lots.add(nextLot);
+                    model.addRow(nextLot.asObjectArray());
                 }
             }
-        }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
