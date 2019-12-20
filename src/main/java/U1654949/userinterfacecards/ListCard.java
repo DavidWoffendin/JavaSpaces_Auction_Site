@@ -1,6 +1,6 @@
 package U1654949.userinterfacecards;
 
-import U1654949.spaceauctionitems.*;
+import U1654949.spacedataobjects.*;
 import U1654949.SpaceUtils;
 import U1654949.User;
 
@@ -106,13 +106,11 @@ public class ListCard extends JPanel {
 
         JButton addLotButton = new JButton();
         addLotButton.setText("Add Lot");
-
         addLotButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 createLot(resultTextOut, itemNameIn, itemDescriptionIn, startingPriceIn, buyNowPriceIn, lots);
             }
         });
-
         JPanel bidListingPanel = new JPanel(new FlowLayout());
         bidListingPanel.add(addLotButton);
         add(bidListingPanel, BorderLayout.SOUTH);
@@ -124,6 +122,23 @@ public class ListCard extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        DefaultTableModel model = (DefaultTableModel) lotList.getModel();
+        try {
+            DIBWAuctionStatusObject lotStatus = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
+            int i = 0;
+            while (i <= lotStatus.getLotCounter()) {
+                DIBWLot template = new DIBWLot(i++ + 1, null, null, null, null, null, null, false, false, false);
+                DIBWLot listLots = (DIBWLot) auctionSpace.readIfExists(template, null, 1000);
+                if (listLots != null) {
+                    this.lots.add(listLots);
+                    model.addRow(listLots.asObjectArray());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void createLot(JTextField resultTextOut, JTextField itemNameIn, JTextField itemDescriptionIn, JTextField startingPriceIn, JTextField buyNowPriceIn, ArrayList<DIBWLot> lots) {
@@ -187,15 +202,11 @@ public class ListCard extends JPanel {
 
     }
 
-    public DefaultTableModel getTableModel(){
-        return ((DefaultTableModel) lotList.getModel());
-    }
-
     private class NewLotNotifier extends Notifier {
 
         @Override
         public void notify(RemoteEvent ev) {
-            DefaultTableModel model = getTableModel();
+            DefaultTableModel model = (DefaultTableModel) lotList.getModel();
             try {
                 DIBWAuctionStatusObject Counter = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
                 DIBWLot latestLot = (DIBWLot) auctionSpace.read(new DIBWLot(Counter.getLotCounter()), null, 1500);
@@ -222,7 +233,7 @@ public class ListCard extends JPanel {
 
         @Override
         public void notify(RemoteEvent ev) {
-            DefaultTableModel model = getTableModel();
+            DefaultTableModel model = (DefaultTableModel) lotList.getModel();
             try {
                 DIBWLotUpdate lotChange = (DIBWLotUpdate) auctionSpace.read(new DIBWLotUpdate(), null, 1500);
                 int currentIndex = -1;
@@ -250,7 +261,7 @@ public class ListCard extends JPanel {
 
         @Override
         public void notify(RemoteEvent ev) {
-            DefaultTableModel model = getTableModel();
+            DefaultTableModel model = (DefaultTableModel) lotList.getModel();
             try {
                 DIBWLotRemove remover = (DIBWLotRemove) auctionSpace.read(new DIBWLotRemove(), null, 1500);
 

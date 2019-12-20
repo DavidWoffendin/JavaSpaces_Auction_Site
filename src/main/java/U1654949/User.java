@@ -1,17 +1,14 @@
 package U1654949;
 
-import U1654949.spaceauctionitems.DIBWUser;
+import U1654949.spacedataobjects.DIBWUser;
 
 /**
- * Simple class used to extend the User space object for easier use within the local auction room
+ * Simple class used to extend the User space object for easier use of user information
+ * within the local client side auction room
  */
 public final class User {
 
     private static DIBWUser user;
-
-    private User() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
 
     public static DIBWUser getCurrentUser(){
         return user;
@@ -23,7 +20,7 @@ public final class User {
      */
     public static DIBWUser setCurrentUser(String username){
         user = new DIBWUser(username);
-        System.out.println("Client: " + username + ": Is Registered");
+        System.out.println("Username: " + username + ": Is Logged in");
         return user;
     }
 

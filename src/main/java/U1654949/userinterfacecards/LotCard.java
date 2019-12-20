@@ -1,6 +1,6 @@
 package U1654949.userinterfacecards;
 
-import U1654949.spaceauctionitems.*;
+import U1654949.spacedataobjects.*;
 import U1654949.SpaceUtils;
 import U1654949.User;
 

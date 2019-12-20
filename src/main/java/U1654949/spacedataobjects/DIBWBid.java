@@ -1,4 +1,4 @@
-package U1654949.spaceauctionitems;
+package U1654949.spacedataobjects;
 
 import net.jini.core.entry.Entry;
 

@@ -1,7 +1,6 @@
-package U1654949.spaceauctionitems;
+package U1654949.spacedataobjects;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * Data Object to store User Details

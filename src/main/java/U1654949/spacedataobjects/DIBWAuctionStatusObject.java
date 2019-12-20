@@ -1,4 +1,4 @@
-package U1654949.spaceauctionitems;
+package U1654949.spacedataobjects;
 
 import net.jini.core.entry.Entry;
 
@@ -11,7 +11,7 @@ import net.jini.core.entry.Entry;
  *    Author: Gary Allen
  *    Date: 5/11/2019
  *    Code version: Commit d92df04377da73d0ff4b328a8b0f6e4e47c0ab79
- *    Availability: https://github.com/GaryAllenGit/JavaSpacesPrintQueue
+ *    Availability: https://github.com/GaryAllenGit/JavaSpacesPrintQueue/blob/master/src/QueueStatus.java
  *
  ***************************************************************************************/
 public class DIBWAuctionStatusObject implements Entry {
