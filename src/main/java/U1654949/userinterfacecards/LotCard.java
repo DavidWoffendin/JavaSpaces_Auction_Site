@@ -109,7 +109,7 @@ public class LotCard extends JPanel {
         buyItNowPrice = new JLabel();
 
         if(!lot.isEnded()) {
-            if (User.getCurrentUser().equals(lot.getUser())) {
+            if (User.getCurrentUser().getId().equals(lot.getUser().getId())) {
                 if(lot.getLastBid() == null){
                     end.setText("Remove Lot");
                     remove = new ActionListener() {

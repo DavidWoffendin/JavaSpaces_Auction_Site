@@ -3,7 +3,8 @@ package U1654949.spaceauctionitems;
 import net.jini.core.entry.Entry;
 
 /**
- * Class for handling lot updates
+ *  Data Object for storing bid information in the JavaSpace
+ *  Also used to trigger notify
  */
 public class DIBWLotUpdate implements Entry {
 
@@ -11,7 +12,7 @@ public class DIBWLotUpdate implements Entry {
     public Double lotPrice;
 
     /**
-     * empty constructor
+     * no args constructor
      */
     public DIBWLotUpdate() {
     }

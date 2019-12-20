@@ -3,7 +3,8 @@ package U1654949.spaceauctionitems;
 import net.jini.core.entry.Entry;
 
 /**
- * Lot class designed to keep track of ended lot items
+ *  Data Object used to store the conditions of a lot ending
+ *  Also used to trigger notify
  */
 public class DIBWLotRemove implements Entry {
 

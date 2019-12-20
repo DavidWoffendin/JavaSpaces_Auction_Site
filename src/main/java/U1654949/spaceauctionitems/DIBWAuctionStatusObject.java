@@ -2,9 +2,18 @@ package U1654949.spaceauctionitems;
 
 import net.jini.core.entry.Entry;
 
-/**
- * Counter class used to count certain objects within the space
- */
+/***************************************************************************************
+ *    Auction Status Object class. This is designed to keep track of all bids and lots
+ *    in the JavaSpace.
+ *    Based of Gary Allen's Queue Status Objects
+ *
+ *    Title: JavaSpacesPrintQueue
+ *    Author: Gary Allen
+ *    Date: 5/11/2019
+ *    Code version: Commit d92df04377da73d0ff4b328a8b0f6e4e47c0ab79
+ *    Availability: https://github.com/GaryAllenGit/JavaSpacesPrintQueue
+ *
+ ***************************************************************************************/
 public class DIBWAuctionStatusObject implements Entry {
 
     public Integer lotCounter;

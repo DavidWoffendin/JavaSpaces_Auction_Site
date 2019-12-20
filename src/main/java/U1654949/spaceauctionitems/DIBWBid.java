@@ -3,7 +3,7 @@ package U1654949.spaceauctionitems;
 import net.jini.core.entry.Entry;
 
 /**
- * JavaSpace item used to store bids for a lot
+ *  Data Object used to store the data for bids in the JavaSpace
  */
 public class DIBWBid implements Entry {
 
@@ -13,7 +13,7 @@ public class DIBWBid implements Entry {
     public DIBWUser user;
 
     /**
-     * empty constructor
+     * no args constructor
      */
     public DIBWBid() {}
 

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 /**
- * Class that represents the lots within the auction system
+ *  Data Object that represents the lots data within the auction system
  */
 public class DIBWLot implements Entry {
 
@@ -23,12 +23,13 @@ public class DIBWLot implements Entry {
     public Boolean boughtOutright;
 
     /**
-     * empty constructor
+     * no args constructor
      */
     public DIBWLot() {
     }
 
     /**
+     * Constructor based of ID
      * @param id constructor just using lot id
      */
     public DIBWLot(Integer id) {
