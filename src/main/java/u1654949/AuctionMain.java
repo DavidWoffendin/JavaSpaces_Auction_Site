@@ -1,8 +1,8 @@
-package U1654949;
+package u1654949;
 
-import U1654949.spacedataobjects.DIBWAuctionStatusObject;
-import U1654949.spacedataobjects.DIBWLot;
-import U1654949.userinterfacecards.ListCard;
+import u1654949.spacedataobjects.DIBWAuctionStatusObject;
+import u1654949.spacedataobjects.DIBWLot;
+import u1654949.userinterfacecards.ListCard;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.TransactionException;
@@ -40,7 +40,7 @@ public class AuctionMain extends JFrame {
     public static void main(String[] args) {
         String id = JOptionPane.showInputDialog(null, " Enter your username: ", null);
         if (id == null || id.length() == 0) throw new RuntimeException("No username provided");
-        User.setCurrentUser(id);
+        ClientUser.setCurrentUser(id);
         new AuctionMain();
     }
 
@@ -48,7 +48,7 @@ public class AuctionMain extends JFrame {
      * Container Generator method simple creates an empty container for use later
      */
     private void containerGenerator() {
-        setTitle("Auction Room - " + User.getCurrentUser().getId());
+        setTitle("Auction Room - " + ClientUser.getCurrentUser().getId());
         Container auctionContainer = getContentPane();
         auctionContainer.setLayout(new BorderLayout());
         JPanel cards = new JPanel(new CardLayout());

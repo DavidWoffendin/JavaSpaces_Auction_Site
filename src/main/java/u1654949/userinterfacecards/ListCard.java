@@ -1,8 +1,8 @@
-package U1654949.userinterfacecards;
+package u1654949.userinterfacecards;
 
-import U1654949.SpaceUtils;
-import U1654949.User;
-import U1654949.spacedataobjects.*;
+import u1654949.SpaceUtils;
+import u1654949.ClientUser;
+import u1654949.spacedataobjects.*;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
@@ -222,7 +222,7 @@ public class ListCard extends JPanel {
             // counts the next lot item
             final int lotNumber = Counter.countLot();
             // creates a new lot object with the retrieved data and new lot id
-            DIBWLot newLot = new DIBWLot(lotNumber, User.getCurrentUser(), null, itemNameIn.getText(),
+            DIBWLot newLot = new DIBWLot(lotNumber, ClientUser.getCurrentUser(), null, itemNameIn.getText(),
                     Double.parseDouble(startingPriceIn.getText()), Double.parseDouble(buyNowPriceIn.getText()),
                     itemDescriptionIn.getText(), false, false, false);
             // writes the new lot to the space
@@ -335,7 +335,7 @@ public class ListCard extends JPanel {
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 3);
                     // notify the bidder they have won
-                    if(User.getCurrentUser().getId().equals(remover.getBuyerName())){
+                    if(ClientUser.getCurrentUser().getId().equals(remover.getBuyerName())){
                         JOptionPane.showMessageDialog(null, "You just won " + lot.getName() + "!");
                     }
                 }
@@ -346,7 +346,7 @@ public class ListCard extends JPanel {
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 3);
                     // Notify the seller their lot was bought
-                    if(User.getCurrentUser().getId().equals(lot.getUser().getId())){
+                    if(ClientUser.getCurrentUser().getId().equals(lot.getUser().getId())){
                         JOptionPane.showMessageDialog(null, "Lot " + lot.getName() + " was just bought!");
                     }
                 }

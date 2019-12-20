@@ -1,8 +1,8 @@
-package U1654949.userinterfacecards;
+package u1654949.userinterfacecards;
 
-import U1654949.spacedataobjects.*;
-import U1654949.SpaceUtils;
-import U1654949.User;
+import u1654949.spacedataobjects.*;
+import u1654949.SpaceUtils;
+import u1654949.ClientUser;
 
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.event.RemoteEvent;
@@ -169,7 +169,7 @@ class LotCard extends JPanel {
 
         // This bit of logic looks at who is currently viewing the lot and assigned buttons based on this
         if(!lot.isEnded()) {
-            if (User.getCurrentUser().getId().equals(lot.getUser().getId())) {
+            if (ClientUser.getCurrentUser().getId().equals(lot.getUser().getId())) {
                 if(lot.getLastBid() == null){
                     // Adds the remove lot functionality to the accept/remove button
                     end.setText("End Lot Early");
@@ -271,7 +271,7 @@ class LotCard extends JPanel {
                 // set the new price of the lot
                 updatedLot.setPrice(bid);
                 // create bid item
-                DIBWBid newBid = new DIBWBid(bidId, User.getCurrentUser(), lot.getId(), bid);
+                DIBWBid newBid = new DIBWBid(bidId, ClientUser.getCurrentUser(), lot.getId(), bid);
 
                 // writes the lot update object into the space
                 javaSpace.write(new DIBWLotUpdate(lot.getId(), bid), txn, 3000);
@@ -466,7 +466,7 @@ class LotCard extends JPanel {
                     add(nf.format(latestBid.getPrice()));
                 }};
                 // checks to see if the there has been a bid added to the lot and that the viewer is the seller
-                if(latestLot.getLastBid() != null && User.getCurrentUser().getId().equals(lot.getUser().getId())){
+                if(latestLot.getLastBid() != null && ClientUser.getCurrentUser().getId().equals(lot.getUser().getId())){
                     //sets the button to accept latest bid
                     end.setText("Accept Latest Bid");
                     end.removeActionListener(remove);

@@ -1,12 +1,12 @@
-package U1654949;
+package u1654949;
 
-import U1654949.spacedataobjects.DIBWUser;
+import u1654949.spacedataobjects.DIBWUser;
 
 /**
  * Simple class used to extend the User space object for easier use of user information
  * within the local client side auction room
  */
-public final class User {
+public final class ClientUser {
 
     private static DIBWUser user;
 

@@ -1,4 +1,4 @@
-package U1654949.spacedataobjects;
+package u1654949.spacedataobjects;
 
 import net.jini.core.entry.Entry;
 

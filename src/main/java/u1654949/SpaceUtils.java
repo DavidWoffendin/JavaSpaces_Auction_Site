@@ -1,4 +1,4 @@
-package U1654949;
+package u1654949;
 
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceRegistrar;

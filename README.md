@@ -1,5 +1,5 @@
 #David Woffendin's Auction Project
-##U1654949
+##u1654949
 ####Distributed and Client Server Systems - CHS2546
 ####Assignment 1 – A JavaSpaces Auction System   
 
