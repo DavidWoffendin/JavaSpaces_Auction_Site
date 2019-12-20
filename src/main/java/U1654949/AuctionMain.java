@@ -56,8 +56,8 @@ public class AuctionMain extends JFrame {
         cards.add(ListCard, "Auctioneer");
         auctionContainer.add(cards);
         pack();
-        setBounds(0, 0, 700, 700);
-        setResizable(true);
+        setBounds(0, 0, 700, 600);
+        setResizable(false);
         setVisible(true);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {

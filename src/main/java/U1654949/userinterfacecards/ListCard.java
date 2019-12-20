@@ -1,15 +1,13 @@
 package U1654949.userinterfacecards;
 
-import U1654949.spacedataobjects.*;
 import U1654949.SpaceUtils;
 import U1654949.User;
-
+import U1654949.spacedataobjects.*;
 import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.Lease;
-import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.transaction.*;
 import net.jini.core.transaction.server.TransactionManager;
 import net.jini.export.Exporter;
@@ -141,6 +139,21 @@ public class ListCard extends JPanel {
 
     }
 
+    /**
+     * The Transactions where based of Gary Allen's Transactions demo
+     * Title: JavaSpacesTransactionsDemo
+     * Author: Gary Allen
+     * Date: 7/11/2019
+     * Code version: Commit aaec1b019b33389f1078956a384e3e27154f3ed0
+     * Availability: https://github.com/GaryAllenGit/JavaSpaceTransactionsDemo/blob/master/src/TxnExample.java
+     *
+     * @param resultTextOut     The results out text field
+     * @param itemNameIn        The input for the item name
+     * @param itemDescriptionIn the input for the item description
+     * @param startingPriceIn   the input for the starting price
+     * @param buyNowPriceIn     the input for the buy it now price
+     * @param lots              the array of pre existing lots.
+     */
     private void createLot(JTextField resultTextOut, JTextField itemNameIn, JTextField itemDescriptionIn, JTextField startingPriceIn, JTextField buyNowPriceIn, ArrayList<DIBWLot> lots) {
         resultTextOut.setText("");
 
@@ -172,16 +185,25 @@ public class ListCard extends JPanel {
         Double startingPrice = Double.parseDouble(startingPriceIn.getText());
         Double buyNowPrice = Double.parseDouble(buyNowPriceIn.getText());
 
-        Transaction transaction = null;
+        Transaction.Created trc = null;
         try {
-            Transaction.Created trc = TransactionFactory.create(transactionManager, 3000);
-            transaction = trc.transaction;
+            trc = TransactionFactory.create(transactionManager, 3000);
+        } catch (Exception e) {
+            System.out.println("Could not create transaction " + e);
+        }
+        Transaction txn = null;
+        if (trc != null) {
+            txn = trc.transaction;
+        }
+        try {
             DIBWAuctionStatusObject Counter = (DIBWAuctionStatusObject) auctionSpace.take(new DIBWAuctionStatusObject(), null, 1500);
             final int lotNumber = Counter.countLot();
             DIBWLot newLot = new DIBWLot(lotNumber, User.getCurrentUser(), null, itemName, startingPrice, buyNowPrice, itemDescription, false, false, false);
-            auctionSpace.write(newLot, transaction, 3600000);
-            auctionSpace.write(Counter, transaction, Lease.FOREVER);
-            transaction.commit();
+            auctionSpace.write(newLot, txn, 3600000);
+            auctionSpace.write(Counter, txn, Lease.FOREVER);
+            if (txn != null) {
+                txn.commit();
+            }
             itemNameIn.setText("");
             itemDescriptionIn.setText("");
             startingPriceIn.setText("");
@@ -189,11 +211,11 @@ public class ListCard extends JPanel {
             resultTextOut.setText("Added Lot: " + lotNumber + "!");
 
             lots.add(newLot);
-        } catch (RemoteException | LeaseDeniedException | TransactionException | InterruptedException | UnusableEntryException e) {
+        } catch (RemoteException | TransactionException | InterruptedException | UnusableEntryException e) {
             System.err.println("Error: " + e);
             try {
-                if(transaction != null){
-                    transaction.abort();
+                if (txn != null) {
+                    txn.abort();
                 }
             } catch (UnknownTransactionException | CannotAbortException | RemoteException ex) {
                 System.err.println("Error: " + ex);
@@ -203,7 +225,6 @@ public class ListCard extends JPanel {
     }
 
     private class NewLotNotifier extends Notifier {
-
         @Override
         public void notify(RemoteEvent ev) {
             DefaultTableModel model = (DefaultTableModel) lotList.getModel();
@@ -211,22 +232,12 @@ public class ListCard extends JPanel {
                 DIBWAuctionStatusObject Counter = (DIBWAuctionStatusObject) auctionSpace.read(new DIBWAuctionStatusObject(), null, 1500);
                 DIBWLot latestLot = (DIBWLot) auctionSpace.read(new DIBWLot(Counter.getLotCounter()), null, 1500);
                 Object[] insertion = latestLot.asObjectArray();
-
-                int currentIndex = -1;
-                for(int i = 0, j = lots.size(); i < j; i++){
-                    if (lots.get(i).getId().intValue() == latestLot.getId().intValue()) {
-                        currentIndex = i;
-
-                        break;
-                    }
-                }
                 lots.add(latestLot);
                 model.addRow(insertion);
             } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
                 System.err.println("Error: " + e);
             }
         }
-
     }
 
     private class LotChangeNotifier extends Notifier {
@@ -311,10 +322,20 @@ public class ListCard extends JPanel {
 
     }
 
+    /***************************************************************************************
+     *    The Notify Class is based of of Gary Allen's notify demo
+     *    This has been refactored into a class for ease of use
+     *    All notify methods simply extend this reducing repeated code
+     *
+     *    Title: JavaSpacesNotifyDemo
+     *    Author: Gary Allen
+     *    Date: 11/07/2018
+     *    Code version: Commit c3df3f380e9c049c4f7fe7aa1ad2b6158abb7f38
+     *    Availability: https://github.com/GaryAllenGit/JavaSpaceNotifyDemo/blob/master/src/HelloWorldNotify.java
+     *
+     ***************************************************************************************/
     public static class Notifier implements RemoteEventListener {
-
         Exporter remoteExporter;
-
         private RemoteEventListener listener;
 
         Notifier() {
@@ -337,6 +358,9 @@ public class ListCard extends JPanel {
         }
     }
 
+    /**
+     * JTable Class used to display Lot information
+     */
     public static class ListTable extends JTable {
 
         ListTable(Object[][] data, Object[] columns){
