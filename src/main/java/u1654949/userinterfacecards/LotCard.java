@@ -35,7 +35,7 @@ import java.util.*;
  */
 class LotCard extends JPanel {
 
-    private final JavaSpace javaSpace; // JavaSpace variable
+    private final JavaSpace auctionSpace; // JavaSpace variable
     private LotTable bidsList; // JTable variable
     private DIBWLot lot; // Lot data object variable
     private TransactionManager transactionManager; // transaction manager variable
@@ -57,7 +57,7 @@ class LotCard extends JPanel {
     LotCard(final JPanel card, DIBWLot lotForCard) {
         super();
         this.card = card;
-        this.javaSpace = SpaceUtils.getSpace();
+        this.auctionSpace = SpaceUtils.getSpace();
         this.transactionManager = SpaceUtils.getManager();
 
         DIBWLot baseLot = lotForCard;
@@ -66,7 +66,7 @@ class LotCard extends JPanel {
         // This attempts to get a template of the lot with a specific ID
         try {
             DIBWLot templateLot = new DIBWLot(lotForCard.getId());
-            baseLot = (DIBWLot) javaSpace.read(templateLot, null, 1500);
+            baseLot = (DIBWLot) auctionSpace.read(templateLot, null, 1500);
         } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
             System.err.println("Error: " + e);
         }
@@ -74,7 +74,7 @@ class LotCard extends JPanel {
         this.lot = baseLot;
 
         // retrieves all associated bids and bid ID's and sorts them
-        bids = getVectorBidMatrix(lot);
+        bids = getBidData(lot);
 
         // This assigns the actions listeners that will be called when the notify method is triggered from the space
         try {
@@ -85,9 +85,9 @@ class LotCard extends JPanel {
             //Lot template
             DIBWLotRemove rTemplate = new DIBWLotRemove(lot.getId(), null, null, null, null);
             // Notify method looks for any bids with the current lot ID getting added to the space
-            javaSpace.notify(bTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(bTemplate, null, bidListener.getListener(), Lease.FOREVER, null);
             // Notify method looks for any remove lot objects with the current lots ID that get added to the space
-            javaSpace.notify(rTemplate, null, endedListener.getListener(), Lease.FOREVER, null);
+            auctionSpace.notify(rTemplate, null, endedListener.getListener(), Lease.FOREVER, null);
         } catch (TransactionException | RemoteException e) {
             System.err.println("Error: " + e);
         }
@@ -101,7 +101,7 @@ class LotCard extends JPanel {
     }
 
     // takes an array of collected bids
-    private Vector<Vector<String>> getVectorBidMatrix(DIBWLot lot){
+    private Vector<Vector<String>> getBidData(DIBWLot lot){
         // creates a number formatter for GBP
         final NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.UK);
         // creates an vector string to store bid information
@@ -110,7 +110,7 @@ class LotCard extends JPanel {
         ArrayList<DIBWBid> lotBids = new ArrayList<>();
         try {
             // attempts to read the current lot from the space based on lot Id
-            DIBWLot currentLot = (DIBWLot) javaSpace.read(new DIBWLot(lot.getId()), null, 1500);
+            DIBWLot currentLot = (DIBWLot) auctionSpace.read(new DIBWLot(lot.getId()), null, 1500);
             // creates an array of bids from the current lot
             ArrayList<Integer> bids = currentLot.getBids();
             // if there are currently no bid just return
@@ -122,7 +122,7 @@ class LotCard extends JPanel {
                 // creates template of bid based on the stored bid Id
                 DIBWBid template = new DIBWBid(bidId, null, lot.getId(), null);
                 // reads the bid item based on the template
-                DIBWBid bidItem = ((DIBWBid) javaSpace.read(template, null, 1500));
+                DIBWBid bidItem = ((DIBWBid) auctionSpace.read(template, null, 1500));
                 // adds that retrieves bid item to the array
                 lotBids.add(bidItem);
             }
@@ -261,8 +261,8 @@ class LotCard extends JPanel {
             }
             // try to get bid counter and take the lot object
             try {
-                DIBWAuctionStatusObject bidCounter = (DIBWAuctionStatusObject) javaSpace.take(new DIBWAuctionStatusObject(), txn, 1500);
-                DIBWLot updatedLot = (DIBWLot) javaSpace.take(new DIBWLot(lot.getId()), txn, 1500);
+                DIBWAuctionStatusObject bidCounter = (DIBWAuctionStatusObject) auctionSpace.take(new DIBWAuctionStatusObject(), txn, 1500);
+                DIBWLot updatedLot = (DIBWLot) auctionSpace.take(new DIBWLot(lot.getId()), txn, 1500);
 
                 // gets a new bid number from the Auction status object
                 int bidId = bidCounter.countBid();
@@ -274,13 +274,13 @@ class LotCard extends JPanel {
                 DIBWBid newBid = new DIBWBid(bidId, ClientUser.getCurrentUser(), lot.getId(), bid);
 
                 // writes the lot update object into the space
-                javaSpace.write(new DIBWLotUpdate(lot.getId(), bid), txn, 3000);
+                auctionSpace.write(new DIBWLotUpdate(lot.getId(), bid), txn, 3000);
                 // rewrites the lot object back into the space
-                javaSpace.write(updatedLot, txn, 3600000);
+                auctionSpace.write(updatedLot, txn, 3600000);
                 // writes the new bid into the space
-                javaSpace.write(newBid, txn, 5000000);
+                auctionSpace.write(newBid, txn, 5000000);
                 // writes the bid object back into the space
-                javaSpace.write(bidCounter, txn, Lease.FOREVER);
+                auctionSpace.write(bidCounter, txn, Lease.FOREVER);
 
                 // the following is all error handling
                 if (txn != null) {
@@ -304,7 +304,9 @@ class LotCard extends JPanel {
 
     private void buyLot() {
         // Double checks the user wants to buy the lot and then continues with removal
-        int result = JOptionPane.showConfirmDialog(null, "Do you want to buy this lot?", "Buy It Now?", JOptionPane.OK_CANCEL_OPTION);
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Buy Lot?"));
+        int result = JOptionPane.showConfirmDialog(null, panel,"Buy It Now?", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             // now buyer is added as that is only for buy functionality
             removeLot(null, false, false, true);
@@ -365,11 +367,11 @@ class LotCard extends JPanel {
         }
         // attempts to read the lot based of the lot id
         try {
-            DIBWLot updatedLot = (DIBWLot) javaSpace.read(new DIBWLot(lot.getId()), txn, 1500);
+            DIBWLot updatedLot = (DIBWLot) auctionSpace.read(new DIBWLot(lot.getId()), txn, 1500);
             //sets the local lot object to the correct settings
             updatedLot.setOverallRemoval(end, remove, bought);
             // writes a new removal object to the space
-            javaSpace.write(new DIBWLotRemove(lot.getId(), buyerName, end, remove, bought), txn, 3000);
+            auctionSpace.write(new DIBWLotRemove(lot.getId(), buyerName, end, remove, bought), txn, 3000);
             // the rest is error handling
             if (txn != null) {
                 txn.commit();
@@ -458,10 +460,10 @@ class LotCard extends JPanel {
         private void bidListener() {
             try {
                 // reads the lot and latest bid associated with a lot
-                final DIBWLot latestLot = (DIBWLot) javaSpace.read(new DIBWLot(lot.getId()), null, 1500);
-                final DIBWBid latestBid = (DIBWBid) javaSpace.read(new DIBWBid(latestLot.getLastBid()), null, 1500);
+                final DIBWLot latestLot = (DIBWLot) auctionSpace.read(new DIBWLot(lot.getId()), null, 1500);
+                final DIBWBid latestBid = (DIBWBid) auctionSpace.read(new DIBWBid(latestLot.getLastBid()), null, 1500);
                 // creates a new vector string with the latest bids users and bid price
-                Vector<String> insertion = new Vector<String>(){{
+                Vector<String> data = new Vector<String>(){{
                     add(latestBid.getUser().getId());
                     add(nf.format(latestBid.getPrice()));
                 }};
@@ -479,7 +481,7 @@ class LotCard extends JPanel {
                     });
                 }
                 // adds the latest bid to the top of the table
-                bids.add(0, insertion);
+                bids.add(0, data);
                 // resets the list
                 bidsList.revalidate();
                 // updates the price to current highest bid
@@ -500,12 +502,7 @@ class LotCard extends JPanel {
         private void lotRemoverListener() {
             try {
                 //Looks for a lot remover with the same ID as the lot
-                final DIBWLotRemove remover = (DIBWLotRemove) javaSpace.read(new DIBWLotRemove(lot.getId()), null, 1500);
-                // if the lot remover is set to remove it states the lots removed and then closes the lot
-                if(remover.isRemoved()){
-                    JOptionPane.showMessageDialog(null, "This lot has been removed!");
-                    card.remove(LotCard.this);
-                }
+                final DIBWLotRemove remover = (DIBWLotRemove) auctionSpace.read(new DIBWLotRemove(lot.getId()), null, 1500);
                 // if the lot is ended by the seller this sets the appropriate information
                 if(remover.isEnded()){
                     end.setVisible(false);
@@ -522,6 +519,11 @@ class LotCard extends JPanel {
                     buyNow.setVisible(false);
                     priceLabel.setText("Lot has been Bought");
                     price.setText("");
+                }
+                // if the lot remover is set to remove it states the lots removed and then closes the lot
+                if(remover.isRemoved()){
+                    JOptionPane.showMessageDialog(null, "This lot has been removed!");
+                    card.remove(LotCard.this);
                 }
             // error handling
             } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {

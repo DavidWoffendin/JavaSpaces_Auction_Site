@@ -204,6 +204,12 @@ public class ListCard extends JPanel {
             return;
         }
 
+        DIBWUser user = ClientUser.getCurrentUser();
+        String name = itemNameIn.getText();
+        String description = itemDescriptionIn.getText();
+        Double startingPrice = Double.parseDouble(startingPriceIn.getText());
+        Double buyItNowPrice = Double.parseDouble(buyNowPriceIn.getText());
+
         // creates the transaction object
         Transaction.Created trc = null;
         try {
@@ -222,9 +228,9 @@ public class ListCard extends JPanel {
             // counts the next lot item
             final int lotNumber = Counter.countLot();
             // creates a new lot object with the retrieved data and new lot id
-            DIBWLot newLot = new DIBWLot(lotNumber, ClientUser.getCurrentUser(), null, itemNameIn.getText(),
-                    Double.parseDouble(startingPriceIn.getText()), Double.parseDouble(buyNowPriceIn.getText()),
-                    itemDescriptionIn.getText(), false, false, false);
+            DIBWLot newLot = new DIBWLot(lotNumber, user, null, name,
+                    startingPrice, buyItNowPrice, description,
+                    false, false, false);
             // writes the new lot to the space
             auctionSpace.write(newLot, txn, 3600000);
             // rewrites the counter to the space
@@ -286,11 +292,11 @@ public class ListCard extends JPanel {
             DefaultTableModel model = (DefaultTableModel) lotList.getModel();
             try {
                 // attempts to read the lot for an auction updater
-                DIBWLotUpdate lotChange = (DIBWLotUpdate) auctionSpace.read(new DIBWLotUpdate(), null, 1500);
+                DIBWLotUpdate lotUpdate = (DIBWLotUpdate) auctionSpace.read(new DIBWLotUpdate(), null, 1500);
                 int currentIndex = -1;
                 // for loop to go through each retrieved lot updater and match it to a valid lot
                 for(int i = 0, j = lots.size(); i < j; i++){
-                    if (lots.get(i).getId().equals(lotChange.getLotId())) {
+                    if (lots.get(i).getId().equals(lotUpdate.getLotId())) {
                         currentIndex = i;
                         break;
                     }
@@ -298,7 +304,7 @@ public class ListCard extends JPanel {
                 // sets the lot the the retrieved lot
                 DIBWLot lot = lots.get(currentIndex);
                 // updates the lot price
-                lot.setPrice(lotChange.getLotPrice());
+                lot.setPrice(lotUpdate.getLotPrice());
                 // remove the old lot from the table
                 model.removeRow(currentIndex);
                 // add the new lot to the table
@@ -319,28 +325,28 @@ public class ListCard extends JPanel {
             DefaultTableModel model = (DefaultTableModel) lotList.getModel();
             try {
                 // try to find a remover item from the space
-                DIBWLotRemove remover = (DIBWLotRemove) auctionSpace.read(new DIBWLotRemove(), null, 1500);
+                DIBWLotRemove lotRemove = (DIBWLotRemove) auctionSpace.read(new DIBWLotRemove(), null, 1500);
                 // similarly to lot updater the for loop search through all lots and matches them to read lot removers
                 int currentIndex = 0;
                 for (int i = 0, j = lots.size(); i < j; i++){
-                    if (lots.get(i).getId().equals(remover.getId())) {
+                    if (lots.get(i).getId().equals(lotRemove.getId())) {
                         currentIndex = i;
                         break;
                     }
                 }
                 // if remover is set to ended set the lot enter to ended
-                if(remover.isEnded()){
+                if(lotRemove.isEnded()){
                     DIBWLot lot = lots.get(currentIndex);
                     lot.setEnded(true);
                     lots.set(currentIndex, lot);
                     model.setValueAt("Ended", currentIndex, 3);
                     // notify the bidder they have won
-                    if(ClientUser.getCurrentUser().getId().equals(remover.getBuyerName())){
+                    if(ClientUser.getCurrentUser().getId().equals(lotRemove.getBuyerName())){
                         JOptionPane.showMessageDialog(null, "You just won " + lot.getName() + "!");
                     }
                 }
                 // if the remover is set to bought then set the lot to ended
-                if(remover.isBoughtOutright()){
+                if(lotRemove.isBoughtOutright()){
                     DIBWLot lot = lots.get(currentIndex);
                     lot.setBoughtOutright(true);
                     lots.set(currentIndex, lot);
@@ -351,16 +357,16 @@ public class ListCard extends JPanel {
                     }
                 }
                 // if the lot was removed then remove the lot from the table
-                if(remover.isRemoved() && currentIndex > -1){
+                if(lotRemove.isRemoved() && currentIndex > -1){
                     lots.remove(currentIndex);
                     model.removeRow(currentIndex);
                 }
                 // remove the remover matching the lot id from the space
-                auctionSpace.takeIfExists(new DIBWLot(remover.getId()), null, 1000);
+                auctionSpace.takeIfExists(new DIBWLot(lotRemove.getId()), null, 1000);
                 // additional cleanup to remove all related bid objects
                 Object o;
                 do {
-                    o = auctionSpace.takeIfExists(new DIBWBid(remover.getId()), null, 1000);
+                    o = auctionSpace.takeIfExists(new DIBWBid(lotRemove.getId()), null, 1000);
                 } while(o != null);
             } catch (UnusableEntryException | InterruptedException | RemoteException | TransactionException e) {
                 System.err.println("Error: " + e);
