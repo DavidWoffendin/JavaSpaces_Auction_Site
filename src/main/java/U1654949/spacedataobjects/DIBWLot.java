@@ -180,10 +180,9 @@ public class DIBWLot implements Entry {
      *
      * @return Data in a single format
      */
-    public Object[] asObjectArray() {
+    public Object[] returnLotData() {
         return new Object[]{
                 name,
-                user == null ? null : user.getId(),
                 nf.format(price),
                 nf.format(buyNowPrice),
                 isEnded() ? "Ended" : "Running"
